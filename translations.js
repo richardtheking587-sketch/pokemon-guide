@@ -10,7 +10,6 @@ const translations = {
         hp: 'HP', attack: 'Ataque', defense: 'Defesa',
         'special-attack': 'Atq. Especial', 'special-defense': 'Def. Especial', speed: 'Velocidade'
     },
-    // DICIONÁRIO PALAVRA POR PALAVRA (Cobre quase todos os Pokémon)
     words: {
         "lives": "vive", "forests": "florestas", "mountains": "montanhas", "caves": "cavernas",
         "water": "água", "sea": "mar", "ocean": "oceano", "land": "terra", "sky": "céu",
@@ -32,47 +31,32 @@ const translations = {
         "it": "ele", "its": "seu", "their": "seu", "they": "eles", "with": "com", "from": "de",
         "under": "sob", "over": "sobre", "near": "perto", "between": "entre", "around": "ao redor",
         "strange": "estranho", "mysterious": "misterioso", "ancient": "antigo", "new": "novo",
-        "back": "costas", "seed": "semente", "plant": "planta", "flower": "flor", "leaf": "folha"
+        "back": "costas", "seed": "semente", "plant": "planta", "flower": "flor", "leaf": "folha",
+        "sprouts": "brota", "absorbing": "absorvendo", "sunlight": "luz solar", "planted": "plantada"
     },
-    // FRASES INTEIRAS (Para ficar mais natural)
     phrases: {
-        "It is said that": "Diz-se que",
-        "A Pokémon that": "Um Pokémon que",
-        "When it is": "Quando está",
-        "It can be": "Pode ser",
+        "It is said that": "Diz-se que", "A Pokémon that": "Um Pokémon que",
+        "When it is": "Quando está", "It can be": "Pode ser",
         "A strange seed was planted on its back at birth": "Uma semente estranha foi plantada em suas costas ao nascer",
         "The plant sprouts and grows with this POKéMON": "A planta brota e cresce com este POKÉMON"
     }
 };
 
-function translate(category, key) {
-    return (translations[category] && translations[category][key.toLowerCase()]) || key;
-}
+function translate(category, key) { return (translations[category] && translations[category][key.toLowerCase()]) || key; }
 
 function translateDescription(text) {
     if (!text) return "Sem descrição.";
-    
-    // 1. Limpa o texto (tira quebras de linha e símbolos estranhos)
     let t = text.replace(/\f/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' ');
-    
-    // 2. Traduz frases prontas primeiro (para ficar mais bonito)
     Object.keys(translations.phrases).forEach(phrase => {
         const regex = new RegExp(phrase, "gi");
         t = t.replace(regex, translations.phrases[phrase]);
     });
-
-    // 3. Traduz palavra por palavra (para cobrir o que sobrar)
     let words = t.split(' ');
     let translatedWords = words.map(word => {
-        // Tira pontuação para traduzir a palavra limpa
         let cleanWord = word.toLowerCase().replace(/[.,!?;()]/g, '');
         let punctuation = word.substring(cleanWord.length);
-        
-        if (translations.words[cleanWord]) {
-            return translations.words[cleanWord] + punctuation;
-        }
+        if (translations.words[cleanWord]) return translations.words[cleanWord] + punctuation;
         return word;
     });
-
     return translatedWords.join(' ').replace(/POKéMON/g, "POKÉMON");
 }
