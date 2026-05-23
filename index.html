@@ -21,69 +21,88 @@
             </nav>
         </header>
 
-        <!-- Seção Pokémon -->
+        <!-- ABA POKÉMON -->
         <div id="pokemon-tab" class="tab-content active">
-            <div class="filter-group">
-                <h3 class="section-title">💎 FILTRAR POR RARIDADE</h3>
-                <div class="rarity-filters">
-                    <button class="r-btn active" onclick="filterByRarity('all')">
-                        <div class="all-circle">TODOS</div>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('comum')">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png" class="r-icon">
-                        <span>COMUM</span>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('raro' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" class="r-icon">
-                        <span>RARO</span>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('lendario' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png" class="r-icon">
-                        <span>LENDÁRIO</span>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('mitico' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png" class="r-icon">
-                        <span>MÍTICO</span>
-                    </button>
+            <div class="rarity-filters">
+                <button class="r-btn active" onclick="filterByRarity('all')">
+                    <div class="all-circle">TODOS</div>
+                    <span>TODOS</span>
+                </button>
+                <button class="r-btn" onclick="filterByRarity('comum')">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png" class="r-icon">
+                    <span>COMUM</span>
+                </button>
+                <button class="r-btn" onclick="filterByRarity('raro' )">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" class="r-icon">
+                    <span>RARO</span>
+                </button>
+                <button class="r-btn" onclick="filterByRarity('lendario' )">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png" class="r-icon">
+                    <span>LENDÁRIO</span>
+                </button>
+                <button class="r-btn" onclick="filterByRarity('mitico' )">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png" class="r-icon">
+                    <span>MÍTICO</span>
+                </button>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar Pokémon por nome ou ID...">
+                <div class="filter-controls">
+                    <select id="generationFilter" class="filter-select">
+                        <option value="">GERAÇÕES</option>
+                        <option value="1">Geração 1</option>
+                        <option value="2">Geração 2</option>
+                        <option value="3">Geração 3</option>
+                        <option value="4">Geração 4</option>
+                        <option value="5">Geração 5</option>
+                        <option value="6">Geração 6</option>
+                        <option value="7">Geração 7</option>
+                        <option value="8">Geração 8</option>
+                        <option value="9">Geração 9</option>
+                    </select>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">TIPOS</option>
+                        <option value="fire">Fogo</option>
+                        <option value="water">Água</option>
+                        <option value="grass">Grama</option>
+                        <option value="electric">Elétrico</option>
+                        <option value="ice">Gelo</option>
+                        <option value="fighting">Lutador</option>
+                        <option value="poison">Veneno</option>
+                        <option value="ground">Terra</option>
+                        <option value="flying">Voador</option>
+                        <option value="psychic">Psíquico</option>
+                        <option value="bug">Inseto</option>
+                        <option value="rock">Pedra</option>
+                        <option value="ghost">Fantasma</option>
+                        <option value="dragon">Dragão</option>
+                        <option value="dark">Sombrio</option>
+                        <option value="steel">Aço</option>
+                        <option value="fairy">Fada</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="search-section">
-                <div class="filters-modern">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar Pokémon por nome ou ID...">
-                    <div class="select-group">
-                        <select id="generationFilter" class="filter-select">
-                            <option value="">GERAÇÕES</option>
-                            <option value="1">Geração 1</option><option value="2">Geração 2</option>
-                            <option value="3">Geração 3</option><option value="4">Geração 4</option>
-                            <option value="5">Geração 5</option><option value="6">Geração 6</option>
-                            <option value="7">Geração 7</option><option value="8">Geração 8</option>
-                            <option value="9">Geração 9</option>
-                        </select>
-                        <select id="typeFilter" class="filter-select">
-                            <option value="">TIPOS</option>
-                            <option value="fire">Fogo</option><option value="water">Água</option>
-                            <option value="grass">Grama</option><option value="electric">Elétrico</option>
-                            <option value="ice">Gelo</option><option value="fighting">Lutador</option>
-                            <option value="psychic">Psíquico</option><option value="dragon">Dragão</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
             <div class="pokemon-grid" id="pokemonGrid"></div>
         </div>
 
-        <!-- Seção Itens -->
+        <!-- ABA ITENS -->
         <div id="items-tab" class="tab-content">
             <h2 class="section-title">🎒 MOCHILA DE ITENS</h2>
             <div class="item-grid" id="itemGrid"></div>
         </div>
 
-        <!-- Seção Pokébolas -->
+        <!-- ABA POKÉBOLAS -->
         <div id="pokeballs-tab" class="tab-content">
             <h2 class="section-title">🔴 COLEÇÃO DE POKÉBOLAS</h2>
             <div class="item-grid" id="pokeballGrid"></div>
         </div>
+
+        <footer class="legal-footer">
+            <p>© 2024 Pokémon Guide - Richard & Daniel</p>
+            <p class="disclaimer">Este site é um projeto de fã. Marcas registradas pertencem à Nintendo.</p>
+        </footer>
 
         <div id="detailModal" class="modal">
             <div class="modal-content">
@@ -91,12 +110,6 @@
                 <div id="detailContent"></div>
             </div>
         </div>
-
-        <footer class="legal-footer">
-            <div class="footer-line"></div>
-            <p>© 2024 Pokémon Guide - Richard & Daniel</p>
-            <p class="disclaimer">Projeto de fã para fins de estudo. Marcas registradas pertencem à Nintendo.</p>
-        </footer>
     </div>
     <script src="translations.js"></script>
     <script src="script.js"></script>
