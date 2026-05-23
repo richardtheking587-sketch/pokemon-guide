@@ -9,26 +9,19 @@ document.addEventListener('DOMContentLoaded', ( ) => {
     loadPokemon(); 
     loadItems();
     loadPokeballs();
-    setupEvents(); 
+    document.getElementById('searchInput').addEventListener('input', filterPokemon);
+    document.getElementById('generationFilter').addEventListener('change', filterPokemon);
+    document.getElementById('typeFilter').addEventListener('change', filterPokemon);
 });
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`${tab}-tab`).classList.add('active');
-    event.target.classList.add('active');
-}
-
-function setupEvents() {
-    document.getElementById('searchInput').addEventListener('input', filterPokemon);
-    document.getElementById('generationFilter').addEventListener('change', filterPokemon);
-    document.getElementById('typeFilter').addEventListener('change', filterPokemon);
-    document.getElementById('closeModalBtn').onclick = () => document.getElementById('detailModal').classList.remove('show');
+    document.getElementById(`btn-${tab}`).classList.add('active');
 }
 
 async function loadPokemon() {
-    const grid = document.getElementById('pokemonGrid');
-    grid.innerHTML = '<div class="loading">Sincronizando...</div>';
     try {
         const batchSize = 100;
         for (let i = 1; i <= 1025; i += batchSize) {
@@ -43,8 +36,7 @@ async function loadPokemon() {
                     image: data.sprites.other['official-artwork'].front_default,
                     shiny: data.sprites.other['official-artwork'].front_shiny,
                     types: data.types.map(t => t.type.name),
-                    base_exp: data.base_experience,
-                    stats: data.stats
+                    base_exp: data.base_experience
                 });
             });
             filterPokemon();
@@ -54,24 +46,24 @@ async function loadPokemon() {
 
 async function loadItems() {
     const grid = document.getElementById('itemGrid');
-    const items = ['potion', 'revive', 'rare-candy', 'lucky-egg', 'exp-share', 'sun-stone'];
+    const items = ['potion', 'revive', 'rare-candy', 'lucky-egg'];
     for (const name of items) {
         const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-        grid.innerHTML += `<div class="item-card" onclick="showItemDetail('${data.name}', '${data.sprites.default}')">
-            <img src="${data.sprites.default}" class="item-img">
-            <div class="item-name">${data.name.replace('-', ' ').toUpperCase()}</div>
+        grid.innerHTML += `<div class="item-card" onclick="showItem('${data.name}', '${data.sprites.default}')">
+            <img src="${data.sprites.default}" style="width:50px">
+            <div class="pokemon-name">${data.name.toUpperCase()}</div>
         </div>`;
     }
 }
 
 async function loadPokeballs() {
     const grid = document.getElementById('pokeballGrid');
-    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'luxury-ball', 'premier-ball'];
+    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball'];
     for (const name of balls) {
         const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-        grid.innerHTML += `<div class="item-card" onclick="showItemDetail('${data.name}', '${data.sprites.default}')">
-            <img src="${data.sprites.default}" class="item-img">
-            <div class="item-name">${data.name.replace('-', ' ').toUpperCase()}</div>
+        grid.innerHTML += `<div class="item-card" onclick="showItem('${data.name}', '${data.sprites.default}')">
+            <img src="${data.sprites.default}" style="width:50px">
+            <div class="pokemon-name">${data.name.toUpperCase()}</div>
         </div>`;
     }
 }
@@ -102,8 +94,7 @@ function filterPokemon() {
 
     document.getElementById('pokemonGrid').innerHTML = filtered.map(p => {
         const r = mythicIds.includes(p.id) ? "mitico" : legendaryIds.includes(p.id) ? "lendario" : p.base_exp >= 175 ? "raro" : "comum";
-        return `
-        <div class="pokemon-card" onclick="showDetail(${p.id})">
+        return `<div class="pokemon-card" onclick="showDetail(${p.id})">
             <div class="rarity-tag rarity-${r}">${r}</div>
             <div class="pokemon-image"><img src="${p.image}"></div>
             <div class="pokemon-name">${p.name.toUpperCase()}</div>
@@ -121,33 +112,31 @@ async function showDetail(id) {
     const p = allPokemon.find(poke => poke.id === id);
     const modal = document.getElementById('detailModal');
     const content = document.getElementById('detailContent');
-    content.innerHTML = '<div class="loading">Carregando...</div>';
+    content.innerHTML = 'Carregando...';
     modal.classList.add('show');
     try {
         const species = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
         const desc = species.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
                      species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "";
         content.innerHTML = `
-            <img src="${p.image}" style="width:120px">
+            <img src="${p.image}" style="width:100px">
             <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
-            <div class="detail-description" style="color:#888; font-size:0.8em; margin:15px 0;">${translateDescription(desc)}</div>
-            <button class="nav-btn" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
+            <p style="font-size:0.7em; color:#888; margin:10px 0;">${translateDescription(desc)}</p>
+            <button class="nav-btn active" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
         `;
     } catch (e) { content.innerHTML = "Erro."; }
 }
 
-function showItemDetail(name, img) {
+function showItem(name, img) {
     const modal = document.getElementById('detailModal');
     const content = document.getElementById('detailContent');
     modal.classList.add('show');
-    content.innerHTML = `
-        <img src="${img}" style="width:80px">
-        <h2 class="pokemon-name">${name.toUpperCase().replace('-', ' ')}</h2>
-        <p style="color:#888; font-size:0.8em; margin-top:10px;">Este é um item essencial para sua jornada Pokémon!</p>
-    `;
+    content.innerHTML = `<img src="${img}" style="width:60px"><h2 class="pokemon-name">${name.toUpperCase()}</h2><p style="font-size:0.7em; color:#888;">Item de aventura!</p>`;
 }
 
 function toggleShiny(n, s) {
     const img = document.querySelector('#detailContent img');
     img.src = img.src === n ? s : n;
 }
+
+function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
