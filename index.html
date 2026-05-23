@@ -24,19 +24,19 @@
         <!-- Seção Pokémon -->
         <div id="pokemon-tab" class="tab-content active">
             <div class="filter-group">
-                <h3 class="section-title">💎 FILTRAR POR RARIDADE</h3>
+                <h3 class="section-title" style="text-align: center; margin-bottom: 15px; color: var(--primary-red); font-family: 'Orbitron', sans-serif;">💎 FILTRAR POR RARIDADE</h3>
                 <div class="rarity-filters">
                     <button class="r-btn" onclick="filterByRarity('comum')">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png" class="r-icon"> COMUM
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png" class="r-icon" alt="Caterpie"> COMUM
                     </button>
                     <button class="r-btn" onclick="filterByRarity('raro' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" class="r-icon"> RARO
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" class="r-icon" alt="Charizard"> RARO
                     </button>
                     <button class="r-btn" onclick="filterByRarity('lendario' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" class="r-icon"> LENDÁRIO
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" class="r-icon" alt="Mewtwo"> LENDÁRIO
                     </button>
                     <button class="r-btn" onclick="filterByRarity('mitico' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/493.png" class="r-icon"> MÍTICO
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/493.png" class="r-icon" alt="Arceus"> MÍTICO
                     </button>
                     <button class="r-btn active" onclick="filterByRarity('all' )">TODOS</button>
                 </div>
@@ -46,22 +46,37 @@
                 <input type="text" id="searchInput" class="search-input" placeholder="Buscar Pokémon por nome ou ID...">
                 <div class="filters">
                     <select id="generationFilter" class="filter-select">
-                        <option value="">Todas Gerações</option>
-                        <option value="1">Gen 1 (Kanto)</option>
-                        <option value="2">Gen 2 (Johto)</option>
-                        <option value="3">Gen 3 (Hoenn)</option>
-                        <option value="4">Gen 4 (Sinnoh)</option>
-                        <option value="5">Gen 5 (Unova)</option>
-                        <option value="6">Gen 6 (Kalos)</option>
-                        <option value="7">Gen 7 (Alola)</option>
-                        <option value="8">Gen 8 (Galar)</option>
-                        <option value="9">Gen 9 (Paldea)</option>
+                        <option value="">GERAÇÕES</option>
+                        <option value="1">Geração 1 (Kanto)</option>
+                        <option value="2">Geração 2 (Johto)</option>
+                        <option value="3">Geração 3 (Hoenn)</option>
+                        <option value="4">Geração 4 (Sinnoh)</option>
+                        <option value="5">Geração 5 (Unova)</option>
+                        <option value="6">Geração 6 (Kalos)</option>
+                        <option value="7">Geração 7 (Alola)</option>
+                        <option value="8">Geração 8 (Galar)</option>
+                        <option value="9">Geração 9 (Paldea)</option>
                     </select>
                     <select id="typeFilter" class="filter-select">
-                        <option value="">Todos os Tipos</option>
-                        <option value="fire">Fogo</option><option value="water">Água</option>
-                        <option value="grass">Grama</option><option value="electric">Elétrico</option>
-                        <option value="psychic">Psíquico</option><option value="dragon">Dragão</option>
+                        <option value="">TIPOS</option>
+                        <option value="normal">Normal</option>
+                        <option value="fire">Fogo</option>
+                        <option value="water">Água</option>
+                        <option value="grass">Grama</option>
+                        <option value="electric">Elétrico</option>
+                        <option value="ice">Gelo</option>
+                        <option value="fighting">Lutador</option>
+                        <option value="poison">Veneno</option>
+                        <option value="ground">Terra</option>
+                        <option value="flying">Voador</option>
+                        <option value="psychic">Psíquico</option>
+                        <option value="bug">Inseto</option>
+                        <option value="rock">Pedra</option>
+                        <option value="ghost">Fantasma</option>
+                        <option value="dragon">Dragão</option>
+                        <option value="dark">Sombrio</option>
+                        <option value="steel">Aço</option>
+                        <option value="fairy">Fada</option>
                     </select>
                 </div>
             </div>
@@ -70,18 +85,18 @@
 
         <!-- Seção Itens -->
         <div id="items-tab" class="tab-content">
-            <h2 class="section-title">🎒 MOCHILA DE ITENS</h2>
+            <h2 class="section-title" style="text-align: center; margin-bottom: 20px; color: var(--primary-red); font-family: 'Orbitron', sans-serif;">🎒 MOCHILA DE ITENS</h2>
             <div class="item-grid" id="itemGrid"></div>
         </div>
 
         <!-- Seção Pokébolas -->
         <div id="pokeballs-tab" class="tab-content">
-            <h2 class="section-title">🔴 COLEÇÃO DE POKÉBOLAS</h2>
+            <h2 class="section-title" style="text-align: center; margin-bottom: 20px; color: var(--primary-red); font-family: 'Orbitron', sans-serif;">🔴 COLEÇÃO DE POKÉBOLAS</h2>
             <div class="item-grid" id="pokeballGrid"></div>
         </div>
 
         <footer class="legal-footer">
-            <div class="footer-line"></div>
+            <div class="footer-line" style="width: 50px; height: 2px; background: var(--primary-red); margin: 0 auto 15px;"></div>
             <p>© 2024 Pokémon Guide - Richard & Daniel</p>
             <p class="disclaimer">Este site é um projeto de fã para fins de estudo. Pokémon é marca registrada da Nintendo.</p>
         </footer>
@@ -97,3 +112,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
