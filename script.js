@@ -16,9 +16,7 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`${tab}-tab`).classList.add('active');
-    // Encontra o botão que foi clicado
-    const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.innerText.toLowerCase().includes(tab.slice(0,3)));
-    if(btn) btn.classList.add('active');
+    event.target.classList.add('active');
 }
 
 function setupEvents() {
@@ -26,12 +24,11 @@ function setupEvents() {
     document.getElementById('generationFilter').addEventListener('change', filterPokemon);
     document.getElementById('typeFilter').addEventListener('change', filterPokemon);
     document.getElementById('closeModalBtn').onclick = () => document.getElementById('detailModal').classList.remove('show');
-    window.onclick = (e) => { if (e.target == document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('show'); };
 }
 
 async function loadPokemon() {
     const grid = document.getElementById('pokemonGrid');
-    grid.innerHTML = '<div class="loading">Sincronizando Pokédex...</div>';
+    grid.innerHTML = '<div class="loading">Sincronizando...</div>';
     try {
         const batchSize = 100;
         for (let i = 1; i <= 1025; i += batchSize) {
@@ -57,47 +54,32 @@ async function loadPokemon() {
 
 async function loadItems() {
     const grid = document.getElementById('itemGrid');
-    const items = ['potion', 'antidote', 'revive', 'rare-candy', 'lucky-egg', 'exp-share', 'sun-stone', 'moon-stone'];
+    const items = ['potion', 'revive', 'rare-candy', 'lucky-egg', 'exp-share', 'sun-stone'];
     for (const name of items) {
-        try {
-            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-            grid.innerHTML += renderItemCard(data);
-        } catch(e) {}
+        const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
+        grid.innerHTML += `<div class="item-card" onclick="showItemDetail('${data.name}', '${data.sprites.default}')">
+            <img src="${data.sprites.default}" class="item-img">
+            <div class="item-name">${data.name.replace('-', ' ').toUpperCase()}</div>
+        </div>`;
     }
 }
 
 async function loadPokeballs() {
     const grid = document.getElementById('pokeballGrid');
-    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'luxury-ball', 'premier-ball', 'beast-ball'];
+    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'luxury-ball', 'premier-ball'];
     for (const name of balls) {
-        try {
-            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-            grid.innerHTML += renderItemCard(data);
-        } catch(e) {}
+        const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
+        grid.innerHTML += `<div class="item-card" onclick="showItemDetail('${data.name}', '${data.sprites.default}')">
+            <img src="${data.sprites.default}" class="item-img">
+            <div class="item-name">${data.name.replace('-', ' ').toUpperCase()}</div>
+        </div>`;
     }
-}
-
-function renderItemCard(data) {
-    const desc = data.flavor_text_entries.find(e => e.language.name === 'en')?.text || "";
-    return `
-    <div class="item-card">
-        <img src="${data.sprites.default}" class="item-img">
-        <div class="item-name">${data.name.toUpperCase().replace('-', ' ')}</div>
-        <div class="item-desc">${translateDescription(desc)}</div>
-    </div>`;
-}
-
-function getRarity(p) {
-    if (mythicIds.includes(p.id)) return "mitico";
-    if (legendaryIds.includes(p.id)) return "lendario";
-    if (p.base_exp >= 175) return "raro";
-    return "comum";
 }
 
 function filterByRarity(rarity) {
     currentRarity = rarity;
     document.querySelectorAll('.r-btn').forEach(b => {
-        const isAll = rarity === 'all' && b.innerText === 'TODOS';
+        const isAll = rarity === 'all' && b.querySelector('.all-circle');
         const isSpecific = b.innerText.toLowerCase().includes(rarity);
         b.classList.toggle('active', isAll || isSpecific);
     });
@@ -110,30 +92,29 @@ function filterPokemon() {
     const type = document.getElementById('typeFilter').value;
 
     const filtered = allPokemon.filter(p => {
-        const r = getRarity(p);
+        const r = mythicIds.includes(p.id) ? "mitico" : legendaryIds.includes(p.id) ? "lendario" : p.base_exp >= 175 ? "raro" : "comum";
         const mRarity = currentRarity === 'all' || r === currentRarity;
         const mSearch = p.name.includes(term) || String(p.id).includes(term);
-        const mGen = !gen || (p.id >= getGenRange(gen).start && p.id <= getGenRange(gen).end);
+        const mGen = !gen || (p.id >= getGenRange(gen)[0] && p.id <= getGenRange(gen)[1]);
         const mType = !type || p.types.includes(type);
         return mRarity && mSearch && mGen && mType;
     });
 
     document.getElementById('pokemonGrid').innerHTML = filtered.map(p => {
-        const r = getRarity(p);
+        const r = mythicIds.includes(p.id) ? "mitico" : legendaryIds.includes(p.id) ? "lendario" : p.base_exp >= 175 ? "raro" : "comum";
         return `
         <div class="pokemon-card" onclick="showDetail(${p.id})">
-            <div class="rarity-tag rarity-${r}">${r.toUpperCase()}</div>
+            <div class="rarity-tag rarity-${r}">${r}</div>
             <div class="pokemon-image"><img src="${p.image}"></div>
             <div class="pokemon-name">${p.name.toUpperCase()}</div>
             <div class="pokemon-id">#${String(p.id).padStart(4, '0')}</div>
-            <div class="pokemon-types">${p.types.map(t => `<span class="type-badge type-${t}">${translate('types', t)}</span>`).join('')}</div>
         </div>`;
     }).join('');
 }
 
 function getGenRange(gen) {
     const ranges = { 1:[1,151], 2:[152,251], 3:[252,386], 4:[387,493], 5:[494,649], 6:[650,721], 7:[722,809], 8:[810,905], 9:[906,1025] };
-    return { start: ranges[gen][0], end: ranges[gen][1] };
+    return ranges[gen];
 }
 
 async function showDetail(id) {
@@ -144,36 +125,29 @@ async function showDetail(id) {
     modal.classList.add('show');
     try {
         const species = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
-        const evoRes = await fetch(species.evolution_chain.url).then(r => r.json());
         const desc = species.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
                      species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "";
-        const evos = await buildEvoChain(evoRes.chain);
         content.innerHTML = `
-            <div class="detail-header">
-                <img id="modal-img" src="${p.image}" style="width:120px">
-                <div class="detail-name">${p.name.toUpperCase()}</div>
-            </div>
-            <div class="detail-description">${translateDescription(desc)}</div>
-            <div class="evolution-chain" style="display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap;">
-                ${evos.map(e => `<div style="font-size:0.6em; text-align:center;"><img src="${e.image}" style="width:50px">  
-${e.name}</div>`).join(' → ')}
-            </div>
-            <button class="btn-shiny" style="margin-top:20px; padding:10px; cursor:pointer;" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
+            <img src="${p.image}" style="width:120px">
+            <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
+            <div class="detail-description" style="color:#888; font-size:0.8em; margin:15px 0;">${translateDescription(desc)}</div>
+            <button class="nav-btn" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
         `;
-    } catch (e) { content.innerHTML = "Erro ao carregar."; }
+    } catch (e) { content.innerHTML = "Erro."; }
 }
 
-async function buildEvoChain(chain) {
-    const evos = []; let curr = chain;
-    while (curr) {
-        const id = curr.species.url.split('/').filter(Boolean).pop();
-        evos.push({ id, name: curr.species.name.toUpperCase(), image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png` } );
-        curr = curr.evolves_to[0];
-    }
-    return evos;
+function showItemDetail(name, img) {
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('detailContent');
+    modal.classList.add('show');
+    content.innerHTML = `
+        <img src="${img}" style="width:80px">
+        <h2 class="pokemon-name">${name.toUpperCase().replace('-', ' ')}</h2>
+        <p style="color:#888; font-size:0.8em; margin-top:10px;">Este é um item essencial para sua jornada Pokémon!</p>
+    `;
 }
 
 function toggleShiny(n, s) {
-    const img = document.getElementById('modal-img');
+    const img = document.querySelector('#detailContent img');
     img.src = img.src === n ? s : n;
 }
