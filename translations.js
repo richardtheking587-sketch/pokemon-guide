@@ -1,68 +1,37 @@
+
 const translations = {
-    types: {
-        normal: 'Normal', fire: 'Fogo', water: 'Água', grass: 'Grama',
-        electric: 'Elétrico', ice: 'Gelo', fighting: 'Lutador', poison: 'Veneno',
-        ground: 'Terra', flying: 'Voador', psychic: 'Psíquico', bug: 'Inseto',
-        rock: 'Pedra', ghost: 'Fantasma', dragon: 'Dragão', dark: 'Sombrio',
-        steel: 'Aço', fairy: 'Fada'
-    },
-    stats: {
-        hp: 'HP', attack: 'Ataque', defense: 'Defesa',
-        'special-attack': 'Atq. Especial', 'special-defense': 'Def. Especial', speed: 'Velocidade'
-    },
     words: {
-        "lives": "vive", "forests": "florestas", "mountains": "montanhas", "caves": "cavernas",
-        "water": "água", "sea": "mar", "ocean": "oceano", "land": "terra", "sky": "céu",
-        "power": "poder", "powerful": "poderoso", "speed": "velocidade", "fast": "rápido",
-        "attacks": "ataca", "defends": "defende", "protects": "protege", "stores": "armazena",
-        "energy": "energia", "electricity": "eletricidade", "fire": "fogo", "flames": "chamas",
-        "heat": "calor", "cold": "frio", "ice": "gelo", "snow": "neve", "poison": "veneno",
-        "poisonous": "venenoso", "strong": "forte", "weak": "fraco", "small": "pequeno",
-        "large": "grande", "huge": "gigante", "tail": "cauda", "head": "cabeça",
-        "wings": "asas", "body": "corpo", "skin": "pele", "fur": "pelagem",
-        "claws": "garras", "teeth": "dentes", "mouth": "boca", "eyes": "olhos",
-        "born": "nasce", "birth": "nascimento", "growth": "crescimento", "grows": "cresce",
-        "evolves": "evolui", "evolution": "evolução", "legendary": "lendário", "mythical": "mítico",
-        "said": "dito", "known": "conhecido", "called": "chamado", "found": "encontrado",
-        "rare": "raro", "common": "comum", "wild": "selvagem", "tamer": "treinador",
-        "battle": "batalha", "fight": "luta", "friend": "amigo", "loyal": "leal",
-        "smart": "inteligente", "clever": "esperto", "brave": "corajoso", "angry": "bravo",
-        "sleeps": "dorme", "eats": "come", "hunts": "caça", "flies": "voa", "swims": "nada",
-        "it": "ele", "its": "seu", "their": "seu", "they": "eles", "with": "com", "from": "de",
-        "under": "sob", "over": "sobre", "near": "perto", "between": "entre", "around": "ao redor",
-        "strange": "estranho", "mysterious": "misterioso", "ancient": "antigo", "new": "novo",
-        "back": "costas", "seed": "semente", "plant": "planta", "flower": "flor", "leaf": "folha",
-        "sprouts": "brota", "absorbing": "absorvendo", "sunlight": "luz solar", "planted": "plantada"
+        "when":"quando",
+        "the":"o",
+        "a":"um",
+        "an":"um",
+        "on":"em",
+        "in":"em",
+        "at":"em",
+        "to":"para",
+        "of":"de",
+        "and":"e",
+        "is":"é",
+        "are":"são",
+        "with":"com",
+        "bulb":"bulbo",
+        "back":"costas",
+        "grows":"cresce",
+        "large":"grande",
+        "appears":"parece",
+        "lose":"perder",
+        "ability":"habilidade",
+        "stand":"ficar",
+        "hind":"traseiras",
+        "legs":"pernas"
     },
+
     phrases: {
-        "It is said that": "Diz-se que", "A Pokémon that": "Um Pokémon que",
-        "When it is": "Quando está", "It can be": "Pode ser",
-        "A strange seed was planted on its back at birth": "Uma semente estranha foi plantada em suas costas ao nascer",
-        "The plant sprouts and grows with this POKéMON": "A planta brota e cresce com este POKÉMON"
+        "When the bulb on its back grows large, it appears to lose the ability to stand on its hind legs.":
+        "Quando o bulbo em suas costas cresce bastante, ele parece perder a habilidade de ficar sobre as patas traseiras."
     }
 };
 
-function translate(category, key) { return (translations[category] && translations[category][key.toLowerCase()]) || key; }
-
-function translateDescription(text) {
-    if (!text) return "Sem descrição.";
-    let t = text.replace(/\f/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' ');
-    Object.keys(translations.phrases).forEach(phrase => {
-        const regex = new RegExp(phrase, "gi");
-        t = t.replace(regex, translations.phrases[phrase]);
-    });
-    let words = t.split(' ');
-    let translatedWords = words.map(word => {
-        let cleanWord = word.toLowerCase().replace(/[.,!?;()]/g, '');
-        let punctuation = word.substring(cleanWord.length);
-        if (translations.words[cleanWord]) return translations.words[cleanWord] + punctuation;
-        return word;
-    });
-    return translatedWords.join(' ').replace(/POKéMON/g, "POKÉMON");
-}
-
-
-// Traduções completas de itens e Pokébolas
 const itemNamesPT = {
     "potion": "Poção",
     "super-potion": "Super Poção",
@@ -79,16 +48,41 @@ const itemNamesPT = {
     "poke-ball": "Poké Bola",
     "great-ball": "Grande Bola",
     "ultra-ball": "Ultra Bola",
-    "master-ball": "Master Ball",
-    "safari-ball": "Safari Ball",
-    "luxury-ball": "Luxury Ball",
-    "quick-ball": "Quick Ball",
-    "dusk-ball": "Dusk Ball",
-    "beast-ball": "Beast Ball",
-    "love-ball": "Love Ball",
-    "heavy-ball": "Heavy Ball"
+    "master-ball": "Master Ball"
 };
 
 function getTranslatedItemName(name) {
     return itemNamesPT[name] || name.toUpperCase().replace(/-/g, ' ');
+}
+
+function translateDescription(text) {
+    if (!text) return "Descrição não disponível.";
+
+    let t = text.replace(/\f/g, ' ')
+                .replace(/\n/g, ' ')
+                .replace(/\r/g, ' ')
+                .trim();
+
+    Object.keys(translations.phrases).forEach(phrase => {
+        const regex = new RegExp(
+            phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+            "gi"
+        );
+        t = t.replace(regex, translations.phrases[phrase]);
+    });
+
+    let words = t.split(' ');
+
+    words = words.map(word => {
+        const clean = word.toLowerCase().replace(/[.,!?;:()]/g, '');
+        const punctuation = word.match(/[.,!?;:()]+$/)?.[0] || '';
+
+        if (translations.words[clean]) {
+            return translations.words[clean] + punctuation;
+        }
+
+        return word;
+    });
+
+    return words.join(' ');
 }
