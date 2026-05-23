@@ -15,73 +15,40 @@
                 <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
             </div>
             <nav class="main-nav">
-                <button class="nav-btn active" onclick="switchTab('pokemon' )">POKÉMON</button>
-                <button class="nav-btn" onclick="switchTab('items')">ITENS</button>
-                <button class="nav-btn" onclick="switchTab('pokeballs')">POKÉBOLAS</button>
+                <button class="nav-btn active" id="btn-pokemon" onclick="switchTab('pokemon' )">POKÉMON</button>
+                <button class="nav-btn" id="btn-items" onclick="switchTab('items')">ITENS</button>
+                <button class="nav-btn" id="btn-pokeballs" onclick="switchTab('pokeballs')">POKÉBOLAS</button>
             </nav>
         </header>
 
-        <!-- Seção Pokémon -->
         <div id="pokemon-tab" class="tab-content active">
-            <div class="filter-group">
+            <div class="rarity-section">
                 <h3 class="section-title">💎 FILTRAR POR RARIDADE</h3>
                 <div class="rarity-filters">
-                    <button class="r-btn" onclick="filterByRarity('all')">
-                        <div class="all-circle">TODOS</div>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('comum')">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png" class="r-icon">
-                        <span>COMUM</span>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('raro' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" class="r-icon">
-                        <span>RARO</span>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('lendario' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png" class="r-icon">
-                        <span>LENDÁRIO</span>
-                    </button>
-                    <button class="r-btn" onclick="filterByRarity('mitico' )">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png" class="r-icon">
-                        <span>MÍTICO</span>
-                    </button>
+                    <button class="r-btn active" onclick="filterByRarity('all')"><div class="all-circle">TODOS</div></button>
+                    <button class="r-btn" onclick="filterByRarity('comum')"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png" class="r-icon"><span>COMUM</span></button>
+                    <button class="r-btn" onclick="filterByRarity('raro' )"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png" class="r-icon"><span>RARO</span></button>
+                    <button class="r-btn" onclick="filterByRarity('lendario' )"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" class="r-icon"><span>LENDÁRIO</span></button>
+                    <button class="r-btn" onclick="filterByRarity('mitico' )"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/493.png" class="r-icon"><span>MÍTICO</span></button>
                 </div>
             </div>
 
-            <div class="search-section">
-                <div class="filters-modern">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar Pokémon...">
-                    <div class="select-group">
-                        <select id="generationFilter" class="filter-select">
-                            <option value="">GERAÇÕES</option>
-                            <option value="1">Gen 1</option><option value="2">Gen 2</option><option value="3">Gen 3</option>
-                            <option value="4">Gen 4</option><option value="5">Gen 5</option><option value="6">Gen 6</option>
-                            <option value="7">Gen 7</option><option value="8">Gen 8</option><option value="9">Gen 9</option>
-                        </select>
-                        <select id="typeFilter" class="filter-select">
-                            <option value="">TIPOS</option>
-                            <option value="fire">Fogo</option><option value="water">Água</option>
-                            <option value="grass">Grama</option><option value="electric">Elétrico</option>
-                        </select>
-                    </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
+                <div class="select-group">
+                    <select id="generationFilter"><option value="">GERAÇÕES</option><option value="1">Gen 1</option><option value="2">Gen 2</option><option value="3">Gen 3</option><option value="4">Gen 4</option><option value="5">Gen 5</option><option value="6">Gen 6</option><option value="7">Gen 7</option><option value="8">Gen 8</option><option value="9">Gen 9</option></select>
+                    <select id="typeFilter"><option value="">TIPOS</option><option value="fire">Fogo</option><option value="water">Água</option><option value="grass">Grama</option><option value="electric">Elétrico</option></select>
                 </div>
             </div>
             <div class="pokemon-grid" id="pokemonGrid"></div>
         </div>
 
-        <!-- Outras Abas -->
-        <div id="items-tab" class="tab-content">
-            <h2 class="section-title">🎒 ITENS</h2>
-            <div class="item-grid" id="itemGrid"></div>
-        </div>
-        <div id="pokeballs-tab" class="tab-content">
-            <h2 class="section-title">🔴 POKÉBOLAS</h2>
-            <div class="item-grid" id="pokeballGrid"></div>
-        </div>
+        <div id="items-tab" class="tab-content"><div class="item-grid" id="itemGrid"></div></div>
+        <div id="pokeballs-tab" class="tab-content"><div class="item-grid" id="pokeballGrid"></div></div>
 
         <div id="detailModal" class="modal">
             <div class="modal-content">
-                <span class="close" id="closeModalBtn">&times;</span>
+                <span class="close" onclick="closeModal( )">&times;</span>
                 <div id="detailContent"></div>
             </div>
         </div>
