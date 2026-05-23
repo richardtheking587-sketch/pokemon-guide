@@ -10,7 +10,6 @@
 <body class="dark-theme">
     <div class="container">
         <header class="header">
-            <!-- Clicar aqui volta para o início -->
             <div class="logo-container" onclick="switchTab('pokemon' )" style="cursor:pointer">
                 <div class="pokeball-icon"></div>
                 <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
@@ -43,7 +42,7 @@
             <div class="pokemon-grid" id="pokemonGrid"></div>
         </div>
 
-        <!-- Aba Comparar (Novo Sistema) -->
+        <!-- Aba Comparar -->
         <div id="compare-tab" class="tab-content">
             <h2 class="section-title">⚔️ DUELO DE ESTATÍSTICAS</h2>
             <div class="compare-container">
@@ -69,7 +68,7 @@
         <div id="pokeballs-tab" class="tab-content"><h2 class="section-title">🔴 POKÉBOLAS</h2><div class="item-grid" id="pokeballGrid"></div></div>
         <div id="favorites-tab" class="tab-content"><h2 class="section-title">⭐ MEUS FAVORITOS</h2><div class="pokemon-grid" id="favoritesGrid"></div></div>
 
-        <!-- Seletor de Pokémon para Comparação (Modal Especial) -->
+        <!-- Modais -->
         <div id="compareSelectorModal" class="modal">
             <div class="modal-content selector-content">
                 <span class="close" onclick="closeCompareSelector()">&times;</span>
@@ -79,7 +78,7 @@
             </div>
         </div>
 
-        <div id="detailModal" class="modal"><div class="modal-content"><span class="close" id="closeModalBtn">&times;</span><div id="detailContent"></div></div></div>
+        <div id="detailModal" class="modal"><div class="modal-content"><span class="close" id="closeModalBtn" onclick="closeModal()">&times;</span><div id="detailContent"></div></div></div>
     </div>
     <script src="translations.js"></script>
     <script src="script.js"></script>
