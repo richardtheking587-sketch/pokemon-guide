@@ -6,7 +6,6 @@ const generationRanges = {
     7: { start: 722, end: 809 }, 8: { start: 810, end: 905 }, 9: { start: 906, end: 1025 }
 };
 
-// IDs Oficiais para Raridade
 const mythicIds = [151, 251, 385, 386, 489, 490, 491, 492, 493, 494, 647, 648, 649, 719, 720, 721, 801, 802, 807, 808, 809, 893];
 const legendaryIds = [144, 145, 146, 150, 243, 244, 245, 249, 250, 377, 378, 379, 380, 381, 382, 383, 384, 480, 481, 482, 483, 484, 485, 486, 487, 488, 638, 639, 640, 641, 642, 643, 644, 645, 646, 716, 717, 718, 772, 773, 785, 786, 787, 788, 789, 790, 791, 792, 800, 888, 889, 890, 891, 892, 894, 895, 896, 897, 898, 1001, 1002, 1003, 1004, 1007, 1008, 1014, 1015, 1016, 1017];
 
@@ -18,12 +17,6 @@ function setupEvents() {
     document.getElementById('typeFilter').addEventListener('change', filterPokemon);
     document.getElementById('closeModalBtn').onclick = () => document.getElementById('detailModal').classList.remove('show');
     window.onclick = (e) => { if (e.target == document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('show'); };
-    document.querySelectorAll('.region-card').forEach(card => {
-        card.addEventListener('click', () => {
-            document.getElementById('generationFilter').value = (document.getElementById('generationFilter').value === card.getAttribute('data-gen')) ? "" : card.getAttribute('data-gen');
-            filterPokemon();
-        });
-    });
 }
 
 async function loadPokemon() {
@@ -83,8 +76,6 @@ function filterPokemon() {
             <div class="pokemon-types">${p.types.map(t => `<span class="type-badge type-${t}">${translate('types', t)}</span>`).join('')}</div>
         </div>`;
     }).join('');
-    
-    document.querySelectorAll('.region-card').forEach(c => c.classList.toggle('active', c.getAttribute('data-gen') === gen));
 }
 
 async function showDetail(id) {
@@ -98,9 +89,16 @@ async function showDetail(id) {
     try {
         const species = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
         const evoRes = await fetch(species.evolution_chain.url).then(r => r.json());
-        const desc = species.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
-                     species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "Sem descrição.";
         
+        // Busca descrição em Português
+        let descObj = species.flavor_text_entries.find(e => e.language.name === 'pt');
+        let desc = descObj ? descObj.flavor_text : species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "Sem descrição.";
+        
+        // Se a descrição for em inglês, traduz automaticamente usando nosso dicionário
+        if (!descObj) {
+            desc = translateDescription(desc);
+        }
+
         const r = getRarity(p);
         const rClass = r.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const evos = await buildEvoChain(evoRes.chain);
