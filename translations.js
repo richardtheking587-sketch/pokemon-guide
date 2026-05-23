@@ -10,38 +10,54 @@ const translations = {
         hp: 'HP', attack: 'Ataque', defense: 'Defesa',
         'special-attack': 'Atq. Especial', 'special-defense': 'Def. Especial', speed: 'Velocidade'
     },
-    // DICIONÁRIO DE ELITE: Pokébolas e Itens
+    // DICIONÁRIO DE TRADUÇÃO UNIVERSAL (PT-BR)
     phrases: {
-        // Pokébolas
-        "A device for catching wild Pokémon": "Dispositivo para capturar Pokémon selvagens.",
-        "A good, high-performance Ball": "Uma bola de alta performance com melhor taxa de sucesso.",
-        "An ultra-performance Ball": "Uma bola de ultra performance. Excelente para Pokémon difíceis.",
-        "The best Ball with the ultimate level of performance": "A melhor bola de todas. Captura qualquer Pokémon sem falhar (100% de chance).",
-        "A Ball for use in the Safari Zone": "Uma bola especial usada apenas na Zona Safari.",
-        "A comfortable Ball that makes a Pokémon quickly grow friendly": "Uma bola luxuosa que torna o Pokémon amigável mais rápido.",
-        "A somewhat rare Ball that has been made as a commemorative item": "Uma bola rara comemorativa. Tem a mesma taxa de uma Pokébola comum.",
-        "A Ball that works especially well on weaker Pokémon": "Funciona muito melhor em Pokémon de nível baixo.",
-        "Works well on Pokémon that are found in caves or at night": "Funciona 3x melhor em cavernas ou durante a noite.",
-        "Works well on Pokémon encountered while fishing or surfing": "Ideal para Pokémon aquáticos (pescando ou surfando).",
-        "A Ball that works better the more turns a battle takes": "Fica mais potente quanto mais turnos a batalha durar.",
-        "A Ball that works better on Pokémon you've caught before": "Melhor chance em Pokémon que você já capturou antes.",
-        "A Ball that makes it easier to catch Pokémon at the start of a battle": "Excelente para capturar logo no primeiro turno da batalha.",
-
-        // Itens de Cura e Atributos
-        "Restores HP by 20 points": "Restaura 20 pontos de HP.",
-        "Restores HP by 50 points": "Restaura 50 pontos de HP.",
-        "Restores HP by 200 points": "Restaura 200 pontos de HP.",
-        "A medicine that revives a fainted Pokémon": "Revive um Pokémon desmaiado com metade do HP.",
-        "Fully restores the HP of a fainted Pokémon": "Revive um Pokémon desmaiado com HP total.",
-        "Heals all the status problems": "Cura todos os problemas de status (paralisia, sono, etc).",
-        "A candy that is packed with energy": "Um doce energético que aumenta o nível do Pokémon em 1.",
-        "An item to be held by a Pokémon": "Item que aumenta a experiência ganha em batalhas.",
-        "A stone that causes certain species of Pokémon to evolve": "Uma pedra especial que força a evolução de certas espécies.",
+        // Biologia e Comportamento
+        "A strange seed was planted on its back at birth": "Uma semente estranha foi plantada em suas costas ao nascer",
+        "The plant sprouts and grows with this POKéMON": "A planta brota e cresce com este POKÉMON",
+        "Very smart and very vengeful": "Muito inteligente e vingativo",
+        "it is said that": "diz-se que",
+        "Grabbing one of its many tails": "Segurar uma de suas muitas caudas",
+        "could result in a 1000-year curse": "pode resultar em uma maldição de 1000 anos",
+        "Highly intelligent": "Altamente inteligente",
+        "It lives in": "Ele vive em",
+        "forests": "florestas",
+        "mountains": "montanhas",
+        "caves": "cavernas",
+        "near water": "perto da água",
+        "at birth": "ao nascer",
+        "The plant blooms": "A planta floresce",
+        "by absorbing sunlight": "absorvendo a luz solar",
+        "It can": "Ele pode",
+        "It has": "Ele tem",
+        "It uses": "Ele usa",
+        "When it": "Quando ele",
+        "If it": "Se ele",
+        "tamer": "treinador",
+        "battle": "batalha",
+        "wild": "selvagem",
+        "evolution": "evolução",
+        "power": "poder",
+        "speed": "velocidade",
+        "strength": "força",
+        "body": "corpo",
+        "tail": "cauda",
+        "head": "cabeça",
+        "wings": "asas",
+        "fire": "fogo",
+        "water": "água",
+        "electricity": "eletricidade",
         
-        // Frutas (Berries)
-        "A Berry to be consumed by a Pokémon": "Uma fruta que pode ser comida para curar status ou HP.",
-        "If held by a Pokémon, it can be used to heal confusion": "Se segurada, cura a confusão automaticamente.",
-        "Restores 10 HP": "Restaura 10 de HP em batalha."
+        // Itens e Pokébolas
+        "A device for catching wild Pokémon": "Dispositivo para capturar Pokémon selvagens.",
+        "The best Ball": "A melhor bola de todas.",
+        "without fail": "sem falhar (100% de chance)",
+        "Restores HP": "Restaura HP",
+        "Heals": "Cura",
+        "revives": "revive",
+        "fainted": "desmaiado",
+        "candy": "doce",
+        "raises the level": "aumenta o nível"
     }
 };
 
@@ -51,13 +67,18 @@ function translate(category, key) {
 
 function translateDescription(text) {
     if (!text) return "Informação não disponível.";
-    let t = text.replace(/\f/g, ' '); 
     
-    // Procura e substitui cada termo técnico pelo nosso em Português
+    // Limpeza de texto da API
+    let t = text.replace(/\f/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' '); 
+    
+    // Aplica as traduções do dicionário
     Object.keys(translations.phrases).forEach(en => {
         const regex = new RegExp(en, "gi");
         t = t.replace(regex, translations.phrases[en]);
     });
+    
+    // Pequenos ajustes de gramática automática
+    t = t.replace(/POKéMON/g, "POKÉMON");
     
     return t;
 }
