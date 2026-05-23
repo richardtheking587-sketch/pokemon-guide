@@ -46,25 +46,33 @@ async function loadPokemon() {
 
 async function loadItems() {
     const grid = document.getElementById('itemGrid');
-    const items = ['potion', 'revive', 'rare-candy', 'lucky-egg'];
+    const items = ['potion', 'antidote', 'revive', 'rare-candy', 'lucky-egg', 'exp-share', 'sun-stone', 'moon-stone'];
     for (const name of items) {
-        const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-        grid.innerHTML += `<div class="item-card" onclick="showItem('${data.name}', '${data.sprites.default}')">
-            <img src="${data.sprites.default}" style="width:50px">
-            <div class="pokemon-name">${data.name.toUpperCase()}</div>
-        </div>`;
+        try {
+            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
+            const desc = data.flavor_text_entries.find(e => e.language.name === 'en')?.text || "";
+            grid.innerHTML += `
+            <div class="item-card" onclick="showItemDetail('${data.name}', '${data.sprites.default}', '${desc}')">
+                <img src="${data.sprites.default}" style="width:50px">
+                <div class="pokemon-name">${data.name.toUpperCase().replace('-', ' ')}</div>
+            </div>`;
+        } catch(e) {}
     }
 }
 
 async function loadPokeballs() {
     const grid = document.getElementById('pokeballGrid');
-    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball'];
+    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'luxury-ball', 'premier-ball', 'beast-ball'];
     for (const name of balls) {
-        const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-        grid.innerHTML += `<div class="item-card" onclick="showItem('${data.name}', '${data.sprites.default}')">
-            <img src="${data.sprites.default}" style="width:50px">
-            <div class="pokemon-name">${data.name.toUpperCase()}</div>
-        </div>`;
+        try {
+            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
+            const desc = data.flavor_text_entries.find(e => e.language.name === 'en')?.text || "";
+            grid.innerHTML += `
+            <div class="item-card" onclick="showItemDetail('${data.name}', '${data.sprites.default}', '${desc}')">
+                <img src="${data.sprites.default}" style="width:50px">
+                <div class="pokemon-name">${data.name.toUpperCase().replace('-', ' ')}</div>
+            </div>`;
+        } catch(e) {}
     }
 }
 
@@ -112,30 +120,51 @@ async function showDetail(id) {
     const p = allPokemon.find(poke => poke.id === id);
     const modal = document.getElementById('detailModal');
     const content = document.getElementById('detailContent');
-    content.innerHTML = 'Carregando...';
+    content.innerHTML = '<div class="loading">Sincronizando dados...</div>';
     modal.classList.add('show');
     try {
         const species = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
+        const evoRes = await fetch(species.evolution_chain.url).then(r => r.json());
         const desc = species.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
                      species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "";
+        const evos = await buildEvoChain(evoRes.chain);
         content.innerHTML = `
-            <img src="${p.image}" style="width:100px">
+            <img id="modal-img" src="${p.image}" style="width:120px">
             <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
-            <p style="font-size:0.7em; color:#888; margin:10px 0;">${translateDescription(desc)}</p>
-            <button class="nav-btn active" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
+            <div class="detail-description" style="color:#aaa; font-size:0.8em; margin:15px 0;">${translateDescription(desc)}</div>
+            <button class="nav-btn active" style="margin-bottom:20px" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
+            <div class="evolution-chain" style="display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap; border-top:1px solid #333; padding-top:15px;">
+                <h4 style="width:100%; color:var(--red); font-size:0.7em; margin-bottom:10px;">LINHA EVOLUTIVA</h4>
+                ${evos.map(e => `<div class="evolution-item" onclick="showDetail(${e.id})" style="cursor:pointer; font-size:0.6em;"><img src="${e.image}" style="width:50px">  
+${e.name}</div>`).join(' → ')}
+            </div>
         `;
-    } catch (e) { content.innerHTML = "Erro."; }
+    } catch (e) { content.innerHTML = "Erro ao carregar."; }
 }
 
-function showItem(name, img) {
+async function buildEvoChain(chain) {
+    const evos = []; let curr = chain;
+    while (curr) {
+        const id = curr.species.url.split('/').filter(Boolean).pop();
+        evos.push({ id, name: curr.species.name.toUpperCase(), image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png` } );
+        curr = curr.evolves_to[0];
+    }
+    return evos;
+}
+
+function showItemDetail(name, img, desc) {
     const modal = document.getElementById('detailModal');
     const content = document.getElementById('detailContent');
     modal.classList.add('show');
-    content.innerHTML = `<img src="${img}" style="width:60px"><h2 class="pokemon-name">${name.toUpperCase()}</h2><p style="font-size:0.7em; color:#888;">Item de aventura!</p>`;
+    content.innerHTML = `
+        <img src="${img}" style="width:80px">
+        <h2 class="pokemon-name" style="color:var(--gold)">${name.toUpperCase().replace('-', ' ')}</h2>
+        <p style="color:#aaa; font-size:0.85em; margin-top:15px; line-height:1.5;">${translateDescription(desc)}</p>
+    `;
 }
 
 function toggleShiny(n, s) {
-    const img = document.querySelector('#detailContent img');
+    const img = document.getElementById('modal-img');
     img.src = img.src === n ? s : n;
 }
 
