@@ -18,6 +18,14 @@ const generationRanges = {
     7: { start: 722, end: 809 }, 8: { start: 810, end: 905 }, 9: { start: 906, end: 1025 }
 };
 
+// Dicionário simples para tradução automática de termos comuns nas descrições
+const manualTranslations = {
+    "Very smart and very vengeful.": "Muito inteligente e vingativo.",
+    "Grabbing one of its many tails could result in a 1000-year curse.": "Segurar uma de suas muitas caudas pode resultar em uma maldição de 1000 anos.",
+    "It has a brave and trustworthy nature.": "Tem uma natureza brava e confiável.",
+    "A strange seed was planted on its back at birth.": "Uma semente estranha foi plantada em suas costas ao nascer."
+};
+
 document.addEventListener('DOMContentLoaded', () => { loadPokemon(); setupEventListeners(); });
 
 function setupEventListeners() {
@@ -105,8 +113,20 @@ async function showDetail(id) {
         fetch(`${POKE_API}/pokemon/${id}`).then(r => r.json()),
         fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json())
     ]);
-    let desc = sData.flavor_text_entries.find(e => e.language.name === 'pt') || sData.flavor_text_entries.find(e => e.language.name === 'en');
-    desc = desc ? desc.flavor_text.replace(/\f/g, ' ') : "Sem descrição.";
+    
+    // Busca descrição em PT, senão EN
+    let descObj = sData.flavor_text_entries.find(e => e.language.name === 'pt') || 
+                  sData.flavor_text_entries.find(e => e.language.name === 'en');
+    
+    let desc = descObj ? descObj.flavor_text.replace(/\f/g, ' ') : "Sem descrição.";
+    
+    // Se a descrição for em inglês, tenta traduzir termos conhecidos
+    if (descObj && descObj.language.name === 'en') {
+        Object.keys(manualTranslations).forEach(key => {
+            desc = desc.replace(key, manualTranslations[key]);
+        });
+    }
+
     const evoRes = await fetch(sData.evolution_chain.url);
     const evoData = await evoRes.json();
     renderModalContent(pData, desc, buildEvolutionChain(evoData.chain));
@@ -123,7 +143,7 @@ function renderModalContent(p, desc, evoChain) {
             <div class="detail-id">#${String(p.id).padStart(4, '0')}</div>
             <div>${p.types.map(t => `<span class="type-badge type-${t.type.name}">${translate('types', t.type.name)}</span>`).join('')}</div>
         </div>
-        <div class="detail-description">${desc}</div>
+        <div class="detail-description" id="poke-desc">${desc}</div>
         <div class="stats-grid">
             ${p.stats.map(s => `<div class="stat-item"><b>${translate('stats', s.stat.name)}:</b> ${s.base_stat}</div>`).join('')}
         </div>
