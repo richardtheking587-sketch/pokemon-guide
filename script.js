@@ -2,7 +2,6 @@ const POKE_API = 'https://pokeapi.co/api/v2';
 let allPokemon = [];
 let currentRarity = 'all';
 
-// IDs para Raridade
 const mythicIds = [151, 251, 385, 386, 489, 490, 491, 492, 493, 494, 647, 648, 649, 719, 720, 721, 801, 802, 807, 808, 809, 893];
 const legendaryIds = [144, 145, 146, 150, 243, 244, 245, 249, 250, 377, 378, 379, 380, 381, 382, 383, 384, 480, 481, 482, 483, 484, 485, 486, 487, 488, 638, 639, 640, 641, 642, 643, 644, 645, 646, 716, 717, 718, 772, 773, 785, 786, 787, 788, 789, 790, 791, 792, 800, 888, 889, 890, 891, 892, 894, 895, 896, 897, 898, 1001, 1002, 1003, 1004, 1007, 1008, 1014, 1015, 1016, 1017];
 
@@ -17,7 +16,9 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`${tab}-tab`).classList.add('active');
-    event.target.classList.add('active');
+    // Encontra o botão que foi clicado
+    const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.innerText.toLowerCase().includes(tab.slice(0,3)));
+    if(btn) btn.classList.add('active');
 }
 
 function setupEvents() {
@@ -25,11 +26,12 @@ function setupEvents() {
     document.getElementById('generationFilter').addEventListener('change', filterPokemon);
     document.getElementById('typeFilter').addEventListener('change', filterPokemon);
     document.getElementById('closeModalBtn').onclick = () => document.getElementById('detailModal').classList.remove('show');
+    window.onclick = (e) => { if (e.target == document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('show'); };
 }
 
 async function loadPokemon() {
     const grid = document.getElementById('pokemonGrid');
-    grid.innerHTML = '<div class="loading">Carregando Pokédex...</div>';
+    grid.innerHTML = '<div class="loading">Sincronizando Pokédex...</div>';
     try {
         const batchSize = 100;
         for (let i = 1; i <= 1025; i += batchSize) {
@@ -57,8 +59,10 @@ async function loadItems() {
     const grid = document.getElementById('itemGrid');
     const items = ['potion', 'antidote', 'revive', 'rare-candy', 'lucky-egg', 'exp-share', 'sun-stone', 'moon-stone'];
     for (const name of items) {
-        const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-        grid.innerHTML += renderItemCard(data);
+        try {
+            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
+            grid.innerHTML += renderItemCard(data);
+        } catch(e) {}
     }
 }
 
@@ -66,8 +70,10 @@ async function loadPokeballs() {
     const grid = document.getElementById('pokeballGrid');
     const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'luxury-ball', 'premier-ball', 'beast-ball'];
     for (const name of balls) {
-        const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-        grid.innerHTML += renderItemCard(data);
+        try {
+            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
+            grid.innerHTML += renderItemCard(data);
+        } catch(e) {}
     }
 }
 
@@ -90,7 +96,11 @@ function getRarity(p) {
 
 function filterByRarity(rarity) {
     currentRarity = rarity;
-    document.querySelectorAll('.r-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase() === rarity || (rarity === 'all' && b.innerText === 'TODOS')));
+    document.querySelectorAll('.r-btn').forEach(b => {
+        const isAll = rarity === 'all' && b.innerText === 'TODOS';
+        const isSpecific = b.innerText.toLowerCase().includes(rarity);
+        b.classList.toggle('active', isAll || isSpecific);
+    });
     filterPokemon();
 }
 
@@ -140,15 +150,15 @@ async function showDetail(id) {
         const evos = await buildEvoChain(evoRes.chain);
         content.innerHTML = `
             <div class="detail-header">
-                <img id="modal-img" src="${p.image}" style="width:150px">
+                <img id="modal-img" src="${p.image}" style="width:120px">
                 <div class="detail-name">${p.name.toUpperCase()}</div>
-                <button class="btn-shiny" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
             </div>
             <div class="detail-description">${translateDescription(desc)}</div>
-            <div class="evolution-chain" style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-                ${evos.map(e => `<div style="font-size:0.7em"><img src="${e.image}" style="width:50px">  
+            <div class="evolution-chain" style="display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap;">
+                ${evos.map(e => `<div style="font-size:0.6em; text-align:center;"><img src="${e.image}" style="width:50px">  
 ${e.name}</div>`).join(' → ')}
             </div>
+            <button class="btn-shiny" style="margin-top:20px; padding:10px; cursor:pointer;" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
         `;
     } catch (e) { content.innerHTML = "Erro ao carregar."; }
 }
