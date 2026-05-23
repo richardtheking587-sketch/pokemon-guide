@@ -17,20 +17,18 @@ const generationRanges = {
     7: { start: 722, end: 809 }, 8: { start: 810, end: 905 }, 9: { start: 906, end: 1025 }
 };
 
-// Iniciar
-document.addEventListener('DOMContentLoaded', () => { 
-    loadPokemon(); 
-    setupEvents(); 
-});
+// Listas de IDs para precisão total
+const mythicIds = [151, 251, 385, 386, 489, 490, 491, 492, 493, 494, 647, 648, 649, 719, 720, 721, 801, 802, 807, 808, 809, 893];
+const legendaryIds = [144, 145, 146, 150, 243, 244, 245, 249, 250, 377, 378, 379, 380, 381, 382, 383, 384, 480, 481, 482, 483, 484, 485, 486, 487, 488, 638, 639, 640, 641, 642, 643, 644, 645, 646, 716, 717, 718, 772, 773, 785, 786, 787, 788, 789, 790, 791, 792, 800, 888, 889, 890, 891, 892, 894, 895, 896, 897, 898, 1001, 1002, 1003, 1004, 1007, 1008, 1014, 1015, 1016, 1017];
+
+document.addEventListener('DOMContentLoaded', () => { loadPokemon(); setupEvents(); });
 
 function setupEvents() {
     searchInput.addEventListener('input', filterPokemon);
     generationFilter.addEventListener('change', filterPokemon);
     typeFilter.addEventListener('change', filterPokemon);
-    
     closeModalBtn.onclick = () => detailModal.classList.remove('show');
-    window.onclick = (event) => { if (event.target == detailModal) detailModal.classList.remove('show'); };
-
+    window.onclick = (e) => { if (e.target == detailModal) detailModal.classList.remove('show'); };
     regionCards.forEach(card => {
         card.addEventListener('click', () => {
             const gen = card.getAttribute('data-gen');
@@ -44,36 +42,34 @@ function setupEvents() {
 async function loadPokemon() {
     pokemonGrid.innerHTML = '<div class="loading">Carregando Pokédex...</div>';
     try {
-        // Carrega os primeiros 151 rápido, depois o resto
-        const initialLoad = 151;
-        const promises = [];
-        for (let i = 1; i <= 1025; i++) {
-            promises.push(fetch(`${POKE_API}/pokemon/${i}`).then(res => res.json()));
-            if (i === initialLoad || i === 500 || i === 1025) {
-                const results = await Promise.all(promises.splice(0, promises.length));
-                results.forEach(data => {
-                    allPokemon.push({
-                        id: data.id,
-                        name: data.name,
-                        image: data.sprites.other['official-artwork'].front_default,
-                        shiny: data.sprites.other['official-artwork'].front_shiny,
-                        types: data.types.map(t => t.type.name),
-                        base_exp: data.base_experience,
-                        stats: data.stats,
-                        height: data.height,
-                        weight: data.weight
-                    });
-                });
-                filterPokemon(); // Atualiza a tela enquanto carrega
+        const batchSize = 150;
+        for (let i = 1; i <= 1025; i += batchSize) {
+            const promises = [];
+            for (let j = i; j < i + batchSize && j <= 1025; j++) {
+                promises.push(fetch(`${POKE_API}/pokemon/${j}`).then(res => res.json()));
             }
+            const results = await Promise.all(promises);
+            results.forEach(data => {
+                allPokemon.push({
+                    id: data.id,
+                    name: data.name,
+                    image: data.sprites.other['official-artwork'].front_default,
+                    shiny: data.sprites.other['official-artwork'].front_shiny,
+                    types: data.types.map(t => t.type.name),
+                    base_exp: data.base_experience,
+                    stats: data.stats
+                });
+            });
+            filterPokemon();
         }
-    } catch (e) { console.error("Erro no load:", e); }
+    } catch (e) { console.error(e); }
 }
 
 function getRarity(p) {
-    if (p.id >= 1000 || p.base_exp > 250) return "mitico";
-    if (p.base_exp > 200) return "lendario";
-    if (p.base_exp > 150) return "raro";
+    if (mythicIds.includes(p.id)) return "mítico";
+    if (legendaryIds.includes(p.id)) return "lendário";
+    // Se não for lendário/mítico, mas tiver exp alta ou for estágio final, é Raro
+    if (p.base_exp >= 170) return "raro";
     return "comum";
 }
 
@@ -98,7 +94,7 @@ function renderGrid() {
         const rarity = getRarity(p);
         return `
         <div class="pokemon-card" onclick="showDetail(${p.id})">
-            <div class="rarity-tag rarity-${rarity}">${rarity}</div>
+            <div class="rarity-tag rarity-${rarity.normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${rarity.toUpperCase()}</div>
             <div class="pokemon-image"><img src="${p.image}" alt="${p.name}"></div>
             <div class="pokemon-name">${p.name.toUpperCase()}</div>
             <div class="pokemon-id">#${String(p.id).padStart(4, '0')}</div>
@@ -110,29 +106,23 @@ function renderGrid() {
 }
 
 function updateRegionCards() {
-    regionCards.forEach(card => {
-        card.classList.toggle('active', card.getAttribute('data-gen') === generationFilter.value);
-    });
+    regionCards.forEach(card => card.classList.toggle('active', card.getAttribute('data-gen') === generationFilter.value));
 }
 
 async function showDetail(id) {
     const p = allPokemon.find(poke => poke.id === id);
     if (!p) return;
-
     detailContent.innerHTML = '<div class="loading">Buscando detalhes...</div>';
     detailModal.classList.add('show');
-
     try {
         const speciesRes = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
         const desc = speciesRes.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
                      speciesRes.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "Sem descrição.";
-        
         const rarity = getRarity(p);
-
         detailContent.innerHTML = `
             <div class="detail-header">
                 <div class="detail-image"><img id="modal-img" src="${p.image}"></div>
-                <div class="detail-rarity-buff rarity-${rarity}">✨ Raridade: ${rarity.toUpperCase()}</div>
+                <div class="detail-rarity-buff rarity-${rarity.normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">✨ Raridade: ${rarity.toUpperCase()}</div>
                   
 
                 <button class="btn-shiny" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
@@ -149,11 +139,10 @@ async function showDetail(id) {
                 `).join('')}
             </div>
         `;
-    } catch (e) { detailContent.innerHTML = "Erro ao carregar detalhes."; }
+    } catch (e) { detailContent.innerHTML = "Erro ao carregar."; }
 }
 
 function toggleShiny(normal, shiny) {
     const img = document.getElementById('modal-img');
     img.src = img.src === normal ? shiny : normal;
 }
-
