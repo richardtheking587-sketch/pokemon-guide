@@ -1,62 +1,45 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-    --bg-dark: #080808; --card-bg: #111; --primary-red: #ff0000;
-    --accent-gold: #ffd700; --text-main: #fff; --border: #222;
-}
-body { font-family: 'Roboto', sans-serif; background: var(--bg-dark); color: var(--text-main); }
+:root { --bg: #050505; --card: #111; --red: #ff1f1f; --gold: #ffd700; --text: #fff; --border: #222; }
+body { font-family: 'Roboto', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
-/* Header & Nav */
-.header { padding: 30px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
-.logo { font-family: 'Orbitron', sans-serif; font-size: 2.2em; letter-spacing: 4px; }
-.logo span { color: var(--primary-red); text-shadow: 0 0 10px var(--primary-red); }
-.main-nav { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-.nav-btn { background: #1a1a1a; border: 1px solid var(--border); color: #888; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-family: 'Orbitron', sans-serif; transition: 0.3s; }
-.nav-btn.active { background: var(--primary-red); color: #fff; box-shadow: 0 0 15px var(--primary-red); border: none; }
+/* Header */
+.header { text-align: center; padding: 20px; border-bottom: 2px solid var(--red); margin-bottom: 20px; }
+.logo { font-family: 'Orbitron', sans-serif; font-size: 2em; letter-spacing: 2px; }
+.logo span { color: var(--red); text-shadow: 0 0 10px var(--red); }
+.main-nav { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+.nav-btn { background: #1a1a1a; border: 1px solid var(--border); color: #888; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 0.7em; }
+.nav-btn.active { background: var(--red); color: #fff; box-shadow: 0 0 10px var(--red); }
 
-/* Filtros Neon de Raridade */
-.rarity-filters { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
-.r-btn { background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
-.r-btn span { font-family: 'Orbitron', sans-serif; font-size: 0.7em; margin-top: 8px; color: #888; }
-.r-btn:hover img { transform: scale(1.1); filter: drop-shadow(0 0 10px var(--primary-red)); }
-.r-btn.active span { color: var(--accent-gold); text-shadow: 0 0 5px var(--accent-gold); }
+/* Raridade - CORRIGIDO */
+.rarity-filters { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
+.r-btn { background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; width: 70px; }
+.r-icon { width: 40px !important; height: 40px !important; object-fit: contain; } /* TAMANHO TRAVADO */
+.r-btn span { font-size: 0.6em; color: #666; margin-top: 5px; font-family: 'Orbitron', sans-serif; }
+.r-btn.active span { color: var(--gold); }
+.all-circle { width: 40px; height: 40px; border: 2px solid var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.5em; color: var(--red); box-shadow: 0 0 10px var(--red); }
 
-.r-icon { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); }
+/* Grid e Cards - CORRIGIDO */
+.pokemon-grid, .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+.pokemon-card, .item-card { background: var(--card); border-radius: 15px; padding: 15px; text-align: center; border: 1px solid var(--border); transition: 0.3s; cursor: pointer; height: 250px; display: flex; flex-direction: column; align-items: center; }
+.pokemon-card:hover { border-color: var(--red); transform: translateY(-5px); }
 
-/* Botão TODOS Neon */
-.all-circle {
-    width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary-red);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Orbitron', sans-serif; font-size: 0.6em; color: var(--primary-red);
-    box-shadow: inset 0 0 10px var(--primary-red), 0 0 10px var(--primary-red);
-    text-shadow: 0 0 5px var(--primary-red);
-}
+/* Imagem do Pokémon - TRAVADA */
+.pokemon-image { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.pokemon-image img { max-width: 90px; max-height: 90px; object-fit: contain; }
 
-/* Grids e Cards - CORREÇÃO DE TAMANHO */
-.pokemon-grid, .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.pokemon-card, .item-card { 
-    background: var(--card-bg); border-radius: 15px; padding: 20px; text-align: center; 
-    border: 1px solid var(--border); position: relative; transition: 0.3s; cursor: pointer;
-    height: 280px; display: flex; flex-direction: column; align-items: center;
-}
-.pokemon-card:hover { border-color: var(--primary-red); box-shadow: 0 0 20px rgba(255,0,0,0.2); }
-
-/* TRAVA DE IMAGEM */
-.pokemon-image { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-.pokemon-image img { max-width: 110px; max-height: 110px; object-fit: contain; filter: drop-shadow(0 5px 10px #000); }
-
-.pokemon-name { font-family: 'Orbitron', sans-serif; font-size: 0.9em; color: #fff; margin: 10px 0; }
-.rarity-tag { position: absolute; top: 10px; left: 10px; font-size: 0.6em; font-weight: bold; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+.pokemon-name { font-family: 'Orbitron', sans-serif; font-size: 0.8em; margin: 5px 0; }
+.rarity-tag { font-size: 0.5em; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px; }
 .rarity-comum { background: #444; } .rarity-raro { background: #0066ff; } .rarity-lendario { background: #ffaa00; color: #000; } .rarity-mitico { background: #aa00ff; }
 
 /* Modal */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); }
-.modal.show { display: flex; align-items: center; justify-content: center; }
-.modal-content { background: #0a0a0a; padding: 30px; border-radius: 20px; max-width: 450px; width: 90%; border: 1px solid var(--primary-red); position: relative; text-align: center; }
-.close { position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: #fff; }
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+.modal.show { display: flex; }
+.modal-content { background: #0a0a0a; padding: 20px; border-radius: 15px; max-width: 400px; width: 90%; border: 1px solid var(--red); position: relative; text-align: center; }
+.close { position: absolute; right: 15px; top: 10px; font-size: 25px; cursor: pointer; }
 
-/* Filtros Select */
-.filters-modern { background: #111; padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 30px; }
-.search-input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; margin-bottom: 15px; }
+/* Filtros */
+.search-box { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+#searchInput { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 5px; margin-bottom: 10px; }
 .select-group { display: flex; gap: 10px; }
-.filter-select { flex: 1; padding: 10px; background: #000; color: #fff; border: 1px solid var(--border); border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 0.7em; }
+select { flex: 1; padding: 8px; background: #000; color: #fff; border: 1px solid var(--border); border-radius: 5px; font-size: 0.7em; }
