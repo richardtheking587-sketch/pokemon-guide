@@ -10,37 +10,38 @@ const translations = {
         hp: 'HP', attack: 'Ataque', defense: 'Defesa',
         'special-attack': 'Atq. Especial', 'special-defense': 'Def. Especial', speed: 'Velocidade'
     },
+    // DICIONÁRIO PALAVRA POR PALAVRA (Cobre quase todos os Pokémon)
+    words: {
+        "lives": "vive", "forests": "florestas", "mountains": "montanhas", "caves": "cavernas",
+        "water": "água", "sea": "mar", "ocean": "oceano", "land": "terra", "sky": "céu",
+        "power": "poder", "powerful": "poderoso", "speed": "velocidade", "fast": "rápido",
+        "attacks": "ataca", "defends": "defende", "protects": "protege", "stores": "armazena",
+        "energy": "energia", "electricity": "eletricidade", "fire": "fogo", "flames": "chamas",
+        "heat": "calor", "cold": "frio", "ice": "gelo", "snow": "neve", "poison": "veneno",
+        "poisonous": "venenoso", "strong": "forte", "weak": "fraco", "small": "pequeno",
+        "large": "grande", "huge": "gigante", "tail": "cauda", "head": "cabeça",
+        "wings": "asas", "body": "corpo", "skin": "pele", "fur": "pelagem",
+        "claws": "garras", "teeth": "dentes", "mouth": "boca", "eyes": "olhos",
+        "born": "nasce", "birth": "nascimento", "growth": "crescimento", "grows": "cresce",
+        "evolves": "evolui", "evolution": "evolução", "legendary": "lendário", "mythical": "mítico",
+        "said": "dito", "known": "conhecido", "called": "chamado", "found": "encontrado",
+        "rare": "raro", "common": "comum", "wild": "selvagem", "tamer": "treinador",
+        "battle": "batalha", "fight": "luta", "friend": "amigo", "loyal": "leal",
+        "smart": "inteligente", "clever": "esperto", "brave": "corajoso", "angry": "bravo",
+        "sleeps": "dorme", "eats": "come", "hunts": "caça", "flies": "voa", "swims": "nada",
+        "it": "ele", "its": "seu", "their": "seu", "they": "eles", "with": "com", "from": "de",
+        "under": "sob", "over": "sobre", "near": "perto", "between": "entre", "around": "ao redor",
+        "strange": "estranho", "mysterious": "misterioso", "ancient": "antigo", "new": "novo",
+        "back": "costas", "seed": "semente", "plant": "planta", "flower": "flor", "leaf": "folha"
+    },
+    // FRASES INTEIRAS (Para ficar mais natural)
     phrases: {
-        // Biologia e Corpo
-        "A strange seed was planted on its back": "Uma semente estranha foi plantada em suas costas",
-        "at birth": "ao nascer", "The plant sprouts": "A planta brota", "and grows with": "e cresce com",
-        "Very smart and very vengeful": "Muito inteligente e vingativo",
-        "Grabbing one of its many tails": "Segurar uma de suas muitas caudas",
-        "could result in a 1000-year curse": "pode resultar em uma maldição de 1000 anos",
-        "Highly intelligent": "Altamente inteligente", "It lives in": "Ele vive em",
-        "forests": "florestas", "mountains": "montanhas", "caves": "cavernas",
-        "near water": "perto da água", "The plant blooms": "A planta floresce",
-        "by absorbing sunlight": "absorvendo a luz solar",
-        "It has a": "Ele tem um", "It can": "Ele pode", "It uses": "Ele usa",
-        "When it": "Quando ele", "If it": "Se ele", "tamer": "treinador",
-        "battle": "batalha", "wild": "selvagem", "evolution": "evolução",
-        "power": "poder", "speed": "velocidade", "strength": "força",
-        "body": "corpo", "tail": "cauda", "head": "cabeça", "wings": "asas",
-        "fire": "fogo", "water": "água", "electricity": "eletricidade",
-        "It stores": "Ele armazena", "It sleeps": "Ele dorme", "It eats": "Ele come",
-        "flames": "chamas", "poisonous": "venenoso", "powerful": "poderoso",
-        "It is said": "Diz-se", "legendary": "lendário", "mythical": "mítico",
-
-        // Itens e Pokébolas
-        "A device for catching wild Pokémon": "Dispositivo para capturar Pokémon selvagens.",
-        "The best Ball": "A melhor bola de todas.", "without fail": "sem falhar (100% de chance)",
-        "Restores HP": "Restaura HP", "Heals": "Cura", "revives": "revive",
-        "fainted": "desmaiado", "candy": "doce", "raises the level": "aumenta o nível",
-        "A good, high-performance Ball": "Uma bola de alta performance com melhor taxa de sucesso.",
-        "An ultra-performance Ball": "Uma bola de ultra performance. Excelente para Pokémon difíceis.",
-        "A medicine that revives": "Um remédio que revive", "Restores 10 HP": "Restaura 10 de HP",
-        "Restores 20 HP": "Restaura 20 de HP", "Restores 50 HP": "Restaura 50 de HP",
-        "Restores 200 HP": "Restaura 200 de HP", "Fully restores": "Restaura totalmente"
+        "It is said that": "Diz-se que",
+        "A Pokémon that": "Um Pokémon que",
+        "When it is": "Quando está",
+        "It can be": "Pode ser",
+        "A strange seed was planted on its back at birth": "Uma semente estranha foi plantada em suas costas ao nascer",
+        "The plant sprouts and grows with this POKéMON": "A planta brota e cresce com este POKÉMON"
     }
 };
 
@@ -49,15 +50,29 @@ function translate(category, key) {
 }
 
 function translateDescription(text) {
-    if (!text) return "Informação não disponível.";
-    let t = text.replace(/\f/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' '); 
+    if (!text) return "Sem descrição.";
     
-    // Tradução inteligente por substituição de termos
-    Object.keys(translations.phrases).forEach(en => {
-        const regex = new RegExp(en, "gi");
-        t = t.replace(regex, translations.phrases[en]);
+    // 1. Limpa o texto (tira quebras de linha e símbolos estranhos)
+    let t = text.replace(/\f/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' ');
+    
+    // 2. Traduz frases prontas primeiro (para ficar mais bonito)
+    Object.keys(translations.phrases).forEach(phrase => {
+        const regex = new RegExp(phrase, "gi");
+        t = t.replace(regex, translations.phrases[phrase]);
     });
-    
-    t = t.replace(/POKéMON/g, "POKÉMON");
-    return t;
+
+    // 3. Traduz palavra por palavra (para cobrir o que sobrar)
+    let words = t.split(' ');
+    let translatedWords = words.map(word => {
+        // Tira pontuação para traduzir a palavra limpa
+        let cleanWord = word.toLowerCase().replace(/[.,!?;()]/g, '');
+        let punctuation = word.substring(cleanWord.length);
+        
+        if (translations.words[cleanWord]) {
+            return translations.words[cleanWord] + punctuation;
+        }
+        return word;
+    });
+
+    return translatedWords.join(' ').replace(/POKéMON/g, "POKÉMON");
 }
