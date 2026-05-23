@@ -60,3 +60,35 @@ function translateDescription(text) {
     });
     return translatedWords.join(' ').replace(/POKéMON/g, "POKÉMON");
 }
+
+
+// Traduções completas de itens e Pokébolas
+const itemNamesPT = {
+    "potion": "Poção",
+    "super-potion": "Super Poção",
+    "hyper-potion": "Hiper Poção",
+    "max-potion": "Poção Máxima",
+    "revive": "Reviver",
+    "rare-candy": "Doce Raro",
+    "sun-stone": "Pedra do Sol",
+    "moon-stone": "Pedra da Lua",
+    "fire-stone": "Pedra de Fogo",
+    "thunder-stone": "Pedra do Trovão",
+    "water-stone": "Pedra da Água",
+
+    "poke-ball": "Poké Bola",
+    "great-ball": "Grande Bola",
+    "ultra-ball": "Ultra Bola",
+    "master-ball": "Master Ball",
+    "safari-ball": "Safari Ball",
+    "luxury-ball": "Luxury Ball",
+    "quick-ball": "Quick Ball",
+    "dusk-ball": "Dusk Ball",
+    "beast-ball": "Beast Ball",
+    "love-ball": "Love Ball",
+    "heavy-ball": "Heavy Ball"
+};
+
+function getTranslatedItemName(name) {
+    return itemNamesPT[name] || name.toUpperCase().replace(/-/g, ' ');
+}
