@@ -18,14 +18,6 @@ const generationRanges = {
     7: { start: 722, end: 809 }, 8: { start: 810, end: 905 }, 9: { start: 906, end: 1025 }
 };
 
-// Dicionário simples para tradução automática de termos comuns nas descrições
-const manualTranslations = {
-    "Very smart and very vengeful.": "Muito inteligente e vingativo.",
-    "Grabbing one of its many tails could result in a 1000-year curse.": "Segurar uma de suas muitas caudas pode resultar em uma maldição de 1000 anos.",
-    "It has a brave and trustworthy nature.": "Tem uma natureza brava e confiável.",
-    "A strange seed was planted on its back at birth.": "Uma semente estranha foi plantada em suas costas ao nascer."
-};
-
 document.addEventListener('DOMContentLoaded', () => { loadPokemon(); setupEventListeners(); });
 
 function setupEventListeners() {
@@ -45,14 +37,12 @@ function setupEventListeners() {
 }
 
 function updateRegionCardsActiveState() {
-    regionCards.forEach(card => {
-        card.classList.toggle('active', card.getAttribute('data-gen') === generationFilter.value);
-    });
+    regionCards.forEach(card => card.classList.toggle('active', card.getAttribute('data-gen') === generationFilter.value));
 }
 
 async function loadPokemon() {
     try {
-        pokemonGrid.innerHTML = '<div class="loading">Carregando Pokémon...</div>';
+        pokemonGrid.innerHTML = '<div class="loading">Sincronizando com a Pokédex Global...</div>';
         const promises = [];
         for (let i = 1; i <= 1025; i++) promises.push(fetchPokemonBasic(i));
         const batchSize = 100;
@@ -62,44 +52,46 @@ async function loadPokemon() {
             allPokemon.push(...results.filter(p => p !== null));
             if (i === 0) displayPokemon(allPokemon);
         }
-        filteredPokemon = [...allPokemon]; displayPokemon(filteredPokemon);
-    } catch (error) { pokemonGrid.innerHTML = '<div class="no-results">Erro ao carregar dados.</div>'; }
+        displayPokemon(allPokemon);
+    } catch (error) { console.error(error); }
 }
 
 async function fetchPokemonBasic(id) {
     try {
         const res = await fetch(`${POKE_API}/pokemon/${id}`);
         const data = await res.json();
+        const speciesRes = await fetch(data.species.url);
+        const speciesData = await speciesRes.json();
+
+        // Lógica de Raridade
+        let rarity = "comum";
+        if (speciesData.is_mythical) rarity = "mitico";
+        else if (speciesData.is_legendary) rarity = "lendario";
+        else if (data.base_experience > 200) rarity = "raro";
+
         return {
-            id: data.id, name: data.name.charAt(0).toUpperCase() + data.name.slice(1),
+            id: data.id, name: data.name,
             image: data.sprites.other['official-artwork'].front_default,
             shinyImage: data.sprites.other['official-artwork'].front_shiny,
             types: data.types.map(t => t.type.name),
+            rarity: rarity,
             stats: data.stats.reduce((acc, s) => { acc[s.stat.name] = s.base_stat; return acc; }, {}),
             height: data.height / 10, weight: data.weight / 10,
-            abilities: data.abilities.map(a => a.ability.name)
+            raw: data // Guardamos os dados brutos para o modal
         };
     } catch (e) { return null; }
 }
 
-function filterPokemon() {
-    const term = searchInput.value.toLowerCase();
-    const gen = generationFilter.value;
-    const type = typeFilter.value;
-    filteredPokemon = allPokemon.filter(p => {
-        if (term && !p.name.toLowerCase().includes(term)) return false;
-        if (gen) { const r = generationRanges[gen]; if (p.id < r.start || p.id > r.end) return false; }
-        if (type && !p.types.includes(type)) return false;
-        return true;
-    });
-    displayPokemon(filteredPokemon);
-}
-
 function displayPokemon(pokemon) {
+    if (pokemon.length === 0) {
+        pokemonGrid.innerHTML = '<div class="no-results">Nenhum Pokémon encontrado.</div>';
+        return;
+    }
     pokemonGrid.innerHTML = pokemon.map(p => `
         <div class="pokemon-card" onclick="showDetail(${p.id})">
+            <div class="rarity-tag rarity-${p.rarity}">${translateRarity(p.rarity)}</div>
             <div class="pokemon-image"><img src="${p.image}" alt="${p.name}"></div>
-            <div class="pokemon-name">${p.name}</div>
+            <div class="pokemon-name">${p.name.toUpperCase()}</div>
             <div class="pokemon-id">#${String(p.id).padStart(4, '0')}</div>
             <div class="pokemon-types">${p.types.map(t => `<span class="type-badge type-${t}">${translate('types', t)}</span>`).join('')}</div>
         </div>
@@ -107,67 +99,74 @@ function displayPokemon(pokemon) {
 }
 
 async function showDetail(id) {
-    detailContent.innerHTML = '<div class="loading">Carregando...</div>';
+    detailContent.innerHTML = '<div class="loading">Carregando dados do Pokémon...</div>';
     detailModal.classList.add('show');
+    
+    // Busca o Pokémon na nossa lista local para pegar a raridade já calculada
+    const pLocal = allPokemon.find(p => p.id === id);
+    const rarity = pLocal ? pLocal.rarity : "comum";
+
     const [pData, sData] = await Promise.all([
         fetch(`${POKE_API}/pokemon/${id}`).then(r => r.json()),
         fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json())
     ]);
     
-    // Busca descrição em PT, senão EN
-    let descObj = sData.flavor_text_entries.find(e => e.language.name === 'pt') || 
-                  sData.flavor_text_entries.find(e => e.language.name === 'en');
+    let desc = sData.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
+               sData.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "Sem descrição disponível.";
     
-    let desc = descObj ? descObj.flavor_text.replace(/\f/g, ' ') : "Sem descrição.";
-    
-    // Se a descrição for em inglês, tenta traduzir termos conhecidos
-    if (descObj && descObj.language.name === 'en') {
-        Object.keys(manualTranslations).forEach(key => {
-            desc = desc.replace(key, manualTranslations[key]);
-        });
-    }
-
     const evoRes = await fetch(sData.evolution_chain.url);
     const evoData = await evoRes.json();
-    renderModalContent(pData, desc, buildEvolutionChain(evoData.chain));
+    
+    renderModalContent(pData, desc.replace(/\f/g, ' '), buildEvolutionChain(evoData.chain), rarity);
 }
 
-function renderModalContent(p, desc, evoChain) {
+function renderModalContent(p, desc, evoChain, rarity) {
     const normalImg = p.sprites.other['official-artwork'].front_default;
     const shinyImg = p.sprites.other['official-artwork'].front_shiny;
+    
     detailContent.innerHTML = `
         <div class="detail-header">
             <div class="detail-image"><img id="main-pokemon-img" src="${normalImg}"></div>
-            <button class="btn-shiny" onclick="toggleShiny('${normalImg}', '${shinyImg}')">✨ Ver Shiny</button>
+            <div class="detail-rarity-buff rarity-${rarity}">✨ Raridade: ${translateRarity(rarity)}</div>
+              
+
+            <button class="btn-shiny" onclick="toggleShiny('${normalImg}', '${shinyImg}')">✨ VER VERSÃO SHINY</button>
             <div class="detail-name">${p.name.toUpperCase()}</div>
             <div class="detail-id">#${String(p.id).padStart(4, '0')}</div>
-            <div>${p.types.map(t => `<span class="type-badge type-${t.type.name}">${translate('types', t.type.name)}</span>`).join('')}</div>
         </div>
-        <div class="detail-description" id="poke-desc">${desc}</div>
+        <div class="detail-description">${desc}</div>
         <div class="stats-grid">
-            ${p.stats.map(s => `<div class="stat-item"><b>${translate('stats', s.stat.name)}:</b> ${s.base_stat}</div>`).join('')}
+            ${p.stats.map(s => `
+                <div class="stat-item">
+                    <b>${translate('stats', s.stat.name)}:</b> ${s.base_stat}
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width: ${Math.min(s.base_stat/2, 100)}%"></div></div>
+                </div>
+            `).join('')}
         </div>
-        <div class="evolution-chain" style="margin-top:20px">
-            ${evoChain.map(e => `<div class="evolution-item"><img src="${e.image}">  
-${e.name}</div>`).join(' → ')}
+        <div class="evolution-chain" style="margin-top:30px">
+            <h3 style="width:100%; margin-bottom:15px; color:var(--primary-red)">LINHA EVOLUTIVA</h3>
+            ${evoChain.map(e => `<div class="evolution-item" onclick="showDetail(${e.id})" style="cursor:pointer"><img src="${e.image}">  
+${e.name}</div>`).join(' <span style="font-size:2em">→</span> ')}
         </div>
     `;
 }
 
+function translateRarity(r) {
+    const names = { "comum": "Comum", "raro": "Raro", "lendario": "Lendário", "mitico": "Mítico" };
+    return names[r] || r;
+}
+
 function toggleShiny(n, s) {
     const img = document.getElementById('main-pokemon-img');
-    const btn = document.querySelector('.btn-shiny');
     currentShinyMode = !currentShinyMode;
     img.src = currentShinyMode ? s : n;
-    btn.classList.toggle('active', currentShinyMode);
-    btn.innerText = currentShinyMode ? "✨ Ver Normal" : "✨ Ver Shiny";
 }
 
 function buildEvolutionChain(chain) {
     const evos = []; let curr = chain;
     while (curr) {
         const id = curr.species.url.split('/').filter(Boolean).pop();
-        evos.push({ id, name: curr.species.name, image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png` } );
+        evos.push({ id, name: curr.species.name.toUpperCase(), image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png` } );
         curr = curr.evolves_to[0];
     }
     return evos;
