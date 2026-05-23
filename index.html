@@ -52,3 +52,94 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Guide - Master Edition</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="pokeball-icon"></div>
+                    <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
+                </div>
+                <p class="tagline">Database Avançada para Treinadores de Elite</p>
+            </div>
+        </header>
+
+        <section class="regions-section">
+            <h2 class="section-title">🗺️ EXPLORAR REGIÕES</h2>
+            <div class="regions-grid" id="regionsGrid">
+                <div class="region-card" data-gen="1" style="--region-color: #ff4d4d;"><div class="region-name">Kanto</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" class="region-img"></div>
+                <div class="region-card" data-gen="2" style="--region-color: #4db8ff;"><div class="region-name">Johto</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/152.png" class="region-img"></div>
+                <div class="region-card" data-gen="3" style="--region-color: #4dff88;"><div class="region-name">Hoenn</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/252.png" class="region-img"></div>
+                <div class="region-card" data-gen="4" style="--region-color: #ffb84d;"><div class="region-name">Sinnoh</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/387.png" class="region-img"></div>
+                <div class="region-card" data-gen="5" style="--region-color: #ff4db8;"><div class="region-name">Unova</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/495.png" class="region-img"></div>
+                <div class="region-card" data-gen="6" style="--region-color: #b84dff;"><div class="region-name">Kalos</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/650.png" class="region-img"></div>
+                <div class="region-card" data-gen="7" style="--region-color: #4dffff;"><div class="region-name">Alola</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/722.png" class="region-img"></div>
+                <div class="region-card" data-gen="8" style="--region-color: #ffff4d;"><div class="region-name">Galar</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/810.png" class="region-img"></div>
+                <div class="region-card" data-gen="9" style="--region-color: #ff884d;"><div class="region-name">Paldea</div><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/906.png" class="region-img"></div>
+            </div>
+        </section>
+
+        <div class="search-section">
+            <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar Pokémon por nome ou ID...">
+            <div class="filters">
+                <select id="generationFilter" class="filter-select">
+                    <option value="">Gerações</option>
+                    <option value="1">Gen 1 (Kanto )</option>
+                    <option value="2">Gen 2 (Johto)</option>
+                    <option value="3">Gen 3 (Hoenn)</option>
+                    <option value="4">Gen 4 (Sinnoh)</option>
+                    <option value="5">Gen 5 (Unova)</option>
+                    <option value="6">Gen 6 (Kalos)</option>
+                    <option value="7">Gen 7 (Alola)</option>
+                    <option value="8">Gen 8 (Galar)</option>
+                    <option value="9">Gen 9 (Paldea)</option>
+                </select>
+                <select id="typeFilter" class="filter-select">
+                    <option value="">Todos os Tipos</option>
+                    <option value="fire">Fogo</option>
+                    <option value="water">Água</option>
+                    <option value="grass">Grama</option>
+                    <option value="electric">Elétrico</option>
+                    <option value="psychic">Psíquico</option>
+                    <option value="ice">Gelo</option>
+                    <option value="dragon">Dragão</option>
+                    <option value="dark">Sombrio</option>
+                    <option value="fairy">Fada</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="pokemon-grid" id="pokemonGrid"></div>
+
+        <footer class="legal-footer">
+            <div class="footer-line"></div>
+            <p>© 2024 Pokémon Guide - Criado por Richard e Daniel</p>
+            <p class="disclaimer">
+                Este site é um projeto de fã, desenvolvido apenas para fins de estudo e entretenimento (sem fins lucrativos). 
+                Pokémon e todos os nomes de personagens são marcas registradas da <strong>Nintendo, Game Freak e The Pokémon Company</strong>. 
+                Nenhuma violação de direitos autorais é pretendida. Dados fornecidos por <a href="https://pokeapi.co/" target="_blank">PokéAPI</a>.
+            </p>
+        </footer>
+
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="detailContent"></div>
+            </div>
+        </div>
+    </div>
+    <script src="translations.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
