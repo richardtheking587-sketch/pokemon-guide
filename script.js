@@ -1,181 +1,146 @@
-const POKE_API = 'https://pokeapi.co/api/v2';
-let allPokemon = [];
-let itemStorage = {}; // Onde guardamos os dados dos itens com segurança
-let currentRarity = 'all';
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-const mythicIds = [151, 251, 385, 386, 489, 490, 491, 492, 493, 494, 647, 648, 649, 719, 720, 721, 801, 802, 807, 808, 809, 893];
-const legendaryIds = [144, 145, 146, 150, 243, 244, 245, 249, 250, 377, 378, 379, 380, 381, 382, 383, 384, 480, 481, 482, 483, 484, 485, 486, 487, 488, 638, 639, 640, 641, 642, 643, 644, 645, 646, 716, 717, 718, 772, 773, 785, 786, 787, 788, 789, 790, 791, 792, 800, 888, 889, 890, 891, 892, 894, 895, 896, 897, 898, 1001, 1002, 1003, 1004, 1007, 1008, 1014, 1015, 1016, 1017];
-
-document.addEventListener('DOMContentLoaded', ( ) => { 
-    loadPokemon(); 
-    loadItems();
-    loadPokeballs();
-    setupEvents(); 
-});
-
-function setupEvents() {
-    document.getElementById('searchInput').addEventListener('input', filterPokemon);
-    document.getElementById('generationFilter').addEventListener('change', filterPokemon);
-    document.getElementById('typeFilter').addEventListener('change', filterPokemon);
-    document.getElementById('closeModalBtn').onclick = closeModal;
+:root {
+    --bg-dark: #050505;
+    --card-bg: #111111;
+    --primary-red: #ff1f1f;
+    --accent-gold: #ffd700;
+    --text-main: #ffffff;
+    --text-dim: #888888;
+    --border: #222222;
 }
 
-function switchTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`${tab}-tab`).classList.add('active');
-    document.getElementById(`btn-${tab}`).classList.add('active');
+body { 
+    font-family: 'Roboto', sans-serif; 
+    background-color: var(--bg-dark); 
+    /* Efeito de Riscos Tecnológicos no Fundo */
+    background-image: 
+        linear-gradient(rgba(255, 31, 31, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 31, 31, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    color: var(--text-main); 
+    overflow-x: hidden;
 }
 
-async function loadPokemon() {
-    try {
-        const batchSize = 100;
-        for (let i = 1; i <= 1025; i += batchSize) {
-            const promises = [];
-            for (let j = i; j < i + batchSize && j <= 1025; j++) {
-                promises.push(fetch(`${POKE_API}/pokemon/${j}`).then(res => res.json()));
-            }
-            const results = await Promise.all(promises);
-            results.forEach(data => {
-                allPokemon.push({
-                    id: data.id, name: data.name,
-                    image: data.sprites.other['official-artwork'].front_default,
-                    shiny: data.sprites.other['official-artwork'].front_shiny,
-                    types: data.types.map(t => t.type.name),
-                    base_exp: data.base_experience
-                });
-            });
-            filterPokemon();
-        }
-    } catch (e) {}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* Header & Pokebola Girando */
+.header { 
+    padding: 30px; 
+    text-align: center; 
+    border-bottom: 2px solid var(--primary-red);
+    margin-bottom: 30px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
 }
 
-async function loadItems() {
-    const grid = document.getElementById('itemGrid');
-    const items = ['potion', 'super-potion', 'hyper-potion', 'max-potion', 'revive', 'rare-candy', 'sun-stone', 'moon-stone', 'fire-stone', 'thunder-stone', 'water-stone'];
-    for (const name of items) {
-        try {
-            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-            const desc = data.flavor_text_entries.find(e => e.language.name === 'en')?.text || "Item misterioso.";
-            itemStorage[data.name] = { img: data.sprites.default, desc: desc };
-            grid.innerHTML += `
-            <div class="item-card" onclick="openItemModal('${data.name}')">
-                <img src="${data.sprites.default}" class="item-img">
-                <div class="item-name">${data.name.toUpperCase().replace(/-/g, ' ')}</div>
-            </div>`;
-        } catch(e) {}
-    }
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
 
-async function loadPokeballs() {
-    const grid = document.getElementById('pokeballGrid');
-    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'luxury-ball', 'quick-ball', 'dusk-ball', 'beast-ball', 'love-ball', 'heavy-ball'];
-    for (const name of balls) {
-        try {
-            const data = await fetch(`${POKE_API}/item/${name}`).then(r => r.json());
-            const desc = data.flavor_text_entries.find(e => e.language.name === 'en')?.text || "Pokébola especial.";
-            itemStorage[data.name] = { img: data.sprites.default, desc: desc };
-            grid.innerHTML += `
-            <div class="item-card" onclick="openItemModal('${data.name}')">
-                <img src="${data.sprites.default}" class="item-img">
-                <div class="item-name">${data.name.toUpperCase().replace(/-/g, ' ')}</div>
-            </div>`;
-        } catch(e) {}
-    }
+.pokeball-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: 3px solid #333;
+    border-radius: 50%;
+    position: relative;
+    animation: rotatePokeball 3s linear infinite; /* A VOLTA DA POKEBOLA GIRANDO */
+    box-shadow: 0 0 15px var(--primary-red);
 }
 
-function openItemModal(name) {
-    const item = itemStorage[name];
-    const modal = document.getElementById('detailModal');
-    const content = document.getElementById('detailContent');
-    content.innerHTML = `
-        <img src="${item.img}" style="width:80px">
-        <h2 class="pokemon-name" style="color:var(--gold); margin:15px 0;">${name.toUpperCase().replace(/-/g, ' ')}</h2>
-        <div style="color:#aaa; font-size:0.85em; line-height:1.5; padding: 10px;">${translateDescription(item.desc)}</div>
-    `;
-    modal.classList.add('show');
+.pokeball-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: var(--primary-red);
+    border-bottom: 3px solid #333;
+    border-radius: 25px 25px 0 0;
 }
 
-function filterByRarity(rarity) {
-    currentRarity = rarity;
-    document.querySelectorAll('.r-btn').forEach(b => {
-        const isAll = rarity === 'all' && b.innerText.includes('TODOS');
-        const isSpecific = b.innerText.toLowerCase().includes(rarity);
-        b.classList.toggle('active', isAll || isSpecific);
-    });
-    filterPokemon();
+.pokeball-icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 3px solid #333;
+    border-radius: 50%;
+    z-index: 10;
 }
 
-function filterPokemon() {
-    const term = document.getElementById('searchInput').value.toLowerCase();
-    const gen = document.getElementById('generationFilter').value;
-    const type = document.getElementById('typeFilter').value;
-
-    const filtered = allPokemon.filter(p => {
-        const r = mythicIds.includes(p.id) ? "mitico" : legendaryIds.includes(p.id) ? "lendario" : p.base_exp >= 175 ? "raro" : "comum";
-        const mRarity = currentRarity === 'all' || r === currentRarity;
-        const mSearch = p.name.includes(term) || String(p.id).includes(term);
-        const mGen = !gen || (p.id >= getGenRange(gen)[0] && p.id <= getGenRange(gen)[1]);
-        const mType = !type || p.types.includes(type);
-        return mRarity && mSearch && mGen && mType;
-    });
-
-    document.getElementById('pokemonGrid').innerHTML = filtered.map(p => {
-        const r = mythicIds.includes(p.id) ? "mitico" : legendaryIds.includes(p.id) ? "lendario" : p.base_exp >= 175 ? "raro" : "comum";
-        return `
-        <div class="pokemon-card" onclick="showDetail(${p.id})">
-            <div class="rarity-tag rarity-${r}">${r.toUpperCase()}</div>
-            <div class="pokemon-image"><img src="${p.image}"></div>
-            <div class="pokemon-name">${p.name.toUpperCase()}</div>
-            <div class="pokemon-id">#${String(p.id).padStart(4, '0')}</div>
-        </div>`;
-    }).join('');
+@keyframes rotatePokeball {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-function getGenRange(gen) {
-    const ranges = { 1:[1,151], 2:[152,251], 3:[252,386], 4:[387,493], 5:[494,649], 6:[650,721], 7:[722,809], 8:[810,905], 9:[906,1025] };
-    return ranges[gen];
+.logo { font-family: 'Orbitron', sans-serif; font-size: 2.2em; letter-spacing: 4px; }
+.logo span { color: var(--primary-red); text-shadow: 0 0 10px var(--primary-red); }
+
+/* Navegação */
+.main-nav { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+.nav-btn { 
+    background: #1a1a1a; border: 1px solid var(--border); color: #888; 
+    padding: 10px 25px; border-radius: 20px; cursor: pointer; 
+    font-family: 'Orbitron', sans-serif; font-size: 0.75em; transition: 0.3s;
+}
+.nav-btn.active { 
+    background: var(--primary-red); color: #fff; 
+    box-shadow: 0 0 15px var(--primary-red); border: none; 
 }
 
-async function showDetail(id) {
-    const p = allPokemon.find(poke => poke.id === id);
-    const modal = document.getElementById('detailModal');
-    const content = document.getElementById('detailContent');
-    content.innerHTML = '<div class="loading">Sincronizando...</div>';
-    modal.classList.add('show');
-    try {
-        const species = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
-        const evoRes = await fetch(species.evolution_chain.url).then(r => r.json());
-        const desc = species.flavor_text_entries.find(e => e.language.name === 'pt')?.flavor_text || 
-                     species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "";
-        const evos = await buildEvoChain(evoRes.chain);
-        content.innerHTML = `
-            <img id="modal-img" src="${p.image}" style="width:120px">
-            <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
-            <div class="detail-description" style="color:#aaa; font-size:0.8em; margin:15px 0; padding: 0 10px;">${translateDescription(desc)}</div>
-            <button class="nav-btn active" style="margin-bottom:15px" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
-            <div class="evolution-chain" style="display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap; border-top:1px solid #333; padding-top:15px;">
-                <h4 style="width:100%; color:var(--red); font-size:0.7em; margin-bottom:10px;">LINHA EVOLUTIVA</h4>
-                ${evos.map(e => `<div class="evolution-item" onclick="showDetail(${e.id})" style="cursor:pointer; text-align:center;"><img src="${e.image}" style="width:50px">  
-<span style="font-size:0.6em;">${e.name}</span></div>`).join(' → ')}
-            </div>
-        `;
-    } catch (e) { content.innerHTML = "Erro."; }
+/* Filtros Neon */
+.rarity-filters { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+.r-btn { background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: 0.3s; width: 80px; }
+.r-icon { width: 50px; height: 50px; object-fit: contain; }
+.r-btn span { font-family: 'Orbitron', sans-serif; font-size: 0.6em; margin-top: 8px; color: #666; }
+.r-btn.active span { color: var(--accent-gold); }
+.all-circle { 
+    width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary-red); 
+    display: flex; align-items: center; justify-content: center; 
+    font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: var(--primary-red);
+    box-shadow: 0 0 10px var(--primary-red);
 }
 
-async function buildEvoChain(chain) {
-    const evos = []; let curr = chain;
-    while (curr) {
-        const id = curr.species.url.split('/').filter(Boolean).pop();
-        evos.push({ id: parseInt(id), name: curr.species.name.toUpperCase(), image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png` } );
-        curr = curr.evolves_to[0];
-    }
-    return evos;
+/* Grid e Cards */
+.pokemon-grid, .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+.pokemon-card, .item-card { 
+    background: var(--card-bg); border-radius: 15px; padding: 20px; text-align: center; 
+    border: 1px solid var(--border); transition: 0.3s; cursor: pointer;
+    height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
 }
+.pokemon-card:hover { border-color: var(--primary-red); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,31,31,0.2); }
 
-function toggleShiny(n, s) {
-    const img = document.getElementById('modal-img');
-    img.src = img.src === n ? s : n;
+.pokemon-image img { max-width: 110px; max-height: 110px; object-fit: contain; }
+.item-img { width: 60px; height: 60px; margin-bottom: 15px; }
+.pokemon-name { font-family: 'Orbitron', sans-serif; font-size: 0.85em; margin: 10px 0; }
+.rarity-tag { position: absolute; top: 10px; left: 10px; font-size: 0.55em; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
+.rarity-comum { background: #444; } .rarity-raro { background: #0066ff; } .rarity-lendario { background: #ffaa00; color: #000; } .rarity-mitico { background: #aa00ff; }
+
+/* Modal Premium */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; }
+.modal.show { display: flex; }
+.modal-content { 
+    background: #0a0a0a; padding: 30px; border-radius: 20px; max-width: 450px; width: 90%; 
+    border: 1px solid var(--primary-red); position: relative; text-align: center;
+    box-shadow: 0 0 30px rgba(255,31,31,0.2);
 }
+.close { position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: #666; }
 
-function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
+/* Abas */
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Footer */
+.legal-footer { margin-top: 60px; padding: 40px; text-align: center; color: #333; font-size: 0.7em; }
