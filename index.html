@@ -3,93 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Guide - Ultimate Edition 3.0</title>
+    <title>Pokémon Guide - Elite Edition</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body class="dark-theme">
     <div class="container">
         <header class="header">
-            <div class="logo-container">
+            <!-- Clicar aqui volta para o início -->
+            <div class="logo-container" onclick="switchTab('pokemon' )" style="cursor:pointer">
                 <div class="pokeball-icon"></div>
                 <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
             </div>
             <nav class="main-nav">
-                <button class="nav-btn active" id="btn-pokemon" onclick="switchTab('pokemon' )">POKÉMON</button>
+                <button class="nav-btn active" id="btn-pokemon" onclick="switchTab('pokemon')">POKÉMON</button>
                 <button class="nav-btn" id="btn-items" onclick="switchTab('items')">ITENS</button>
                 <button class="nav-btn" id="btn-pokeballs" onclick="switchTab('pokeballs')">POKÉBOLAS</button>
-                <button class="nav-btn" id="btn-compare" onclick="switchTab('compare')">COMPARAR</button>
+                <button class="nav-btn" id="btn-compare" onclick="switchTab('compare')">⚔️ COMPARAR</button>
                 <button class="nav-btn" id="btn-favorites" onclick="switchTab('favorites')">⭐ FAVORITOS</button>
             </nav>
         </header>
 
+        <!-- Aba Pokémon -->
         <div id="pokemon-tab" class="tab-content active">
             <div class="top-controls">
                 <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR POKÉMON</button>
             </div>
-            
-            <div class="rarity-filters">
-                <button class="r-btn active" onclick="filterByRarity('all')"><div class="all-circle">ALL</div><span>TODOS</span></button>
-                <button class="r-btn" onclick="filterByRarity('comum')"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png" class="r-icon"><span>COMUM</span></button>
-                <button class="r-btn" onclick="filterByRarity('raro' )"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" class="r-icon"><span>RARO</span></button>
-                <button class="r-btn" onclick="filterByRarity('lendario' )"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png" class="r-icon"><span>LENDÁRIO</span></button>
-                <button class="r-btn" onclick="filterByRarity('mitico' )"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png" class="r-icon"><span>MÍTICO</span></button>
-            </div>
-
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Buscar Pokémon por nome ou ID...">
                 <div class="filter-controls">
                     <select id="generationFilter" class="filter-select">
                         <option value="">TODAS AS REGIÕES</option>
-                        <option value="1">Geração 1 - Kanto</option>
-                        <option value="2">Geração 2 - Johto</option>
-                        <option value="3">Geração 3 - Hoenn</option>
-                        <option value="4">Geração 4 - Sinnoh</option>
-                        <option value="5">Geração 5 - Unova</option>
-                        <option value="6">Geração 6 - Kalos</option>
-                        <option value="7">Geração 7 - Alola</option>
-                        <option value="8">Geração 8 - Galar</option>
-                        <option value="9">Geração 9 - Paldea</option>
-                    </select>
-                    <select id="typeFilter" class="filter-select">
-                        <option value="">TODOS OS TIPOS</option>
-                        <option value="fire">Fogo</option><option value="water">Água</option><option value="grass">Grama</option>
-                        <option value="electric">Elétrico</option><option value="ice">Gelo</option><option value="fighting">Lutador</option>
-                        <option value="poison">Veneno</option><option value="ground">Terra</option><option value="flying">Voador</option>
-                        <option value="psychic">Psíquico</option><option value="bug">Inseto</option><option value="rock">Pedra</option>
-                        <option value="ghost">Fantasma</option><option value="dragon">Dragão</option><option value="dark">Sombrio</option>
-                        <option value="steel">Aço</option><option value="fairy">Fada</option>
+                        <option value="1">Kanto</option><option value="2">Johto</option><option value="3">Hoenn</option>
+                        <option value="4">Sinnoh</option><option value="5">Unova</option><option value="6">Kalos</option>
+                        <option value="7">Alola</option><option value="8">Galar</option><option value="9">Paldea</option>
                     </select>
                 </div>
             </div>
             <div class="pokemon-grid" id="pokemonGrid"></div>
         </div>
 
-        <div id="items-tab" class="tab-content"><h2 class="section-title">🎒 MOCHILA DE ITENS</h2><div class="item-grid" id="itemGrid"></div></div>
-        <div id="pokeballs-tab" class="tab-content"><h2 class="section-title">🔴 COLEÇÃO DE POKÉBOLAS</h2><div class="item-grid" id="pokeballGrid"></div></div>
-        
-        <div id="favorites-tab" class="tab-content"><h2 class="section-title">⭐ MEUS FAVORITOS</h2><div class="pokemon-grid" id="favoritesGrid"></div></div>
-        
+        <!-- Aba Comparar (Novo Sistema) -->
         <div id="compare-tab" class="tab-content">
-            <h2 class="section-title">⚔️ COMPARADOR DE POKÉMON</h2>
+            <h2 class="section-title">⚔️ DUELO DE ESTATÍSTICAS</h2>
             <div class="compare-container">
-                <div class="compare-slot" id="slot1">
-                    <input type="text" class="filter-select" id="search1" placeholder="Nome do Pokémon 1...">
-                    <div id="result1" class="compare-result"></div>
+                <div class="compare-slot" id="slot1" onclick="openCompareSelector(1)">
+                    <div id="result1" class="compare-result">
+                        <div class="placeholder-box">?   
+ SELECIONAR POKÉMON 1</div>
+                    </div>
                 </div>
                 <div class="vs-circle">VS</div>
-                <div class="compare-slot" id="slot2">
-                    <input type="text" class="filter-select" id="search2" placeholder="Nome do Pokémon 2...">
-                    <div id="result2" class="compare-result"></div>
+                <div class="compare-slot" id="slot2" onclick="openCompareSelector(2)">
+                    <div id="result2" class="compare-result">
+                        <div class="placeholder-box">?   
+ SELECIONAR POKÉMON 2</div>
+                    </div>
                 </div>
             </div>
+            <div id="comparison-stats" class="comparison-stats"></div>
         </div>
 
-        <footer class="legal-footer">
-            <div class="visitor-counter"><img src="https://hits.dwyl.com/richardtheking587-sketch/pokemon-guide.svg?style=flat-square&show=unique&label=Treinadores%20Online"></div>
-            <p><strong>© 2024 Pokémon Guide - Richard & Daniel</strong></p>
-            <p class="disclaimer">Projeto educativo criado para aprender programação. Pokémon é marca da Nintendo.</p>
-        </footer>
+        <!-- Outras Abas -->
+        <div id="items-tab" class="tab-content"><h2 class="section-title">🎒 MOCHILA</h2><div class="item-grid" id="itemGrid"></div></div>
+        <div id="pokeballs-tab" class="tab-content"><h2 class="section-title">🔴 POKÉBOLAS</h2><div class="item-grid" id="pokeballGrid"></div></div>
+        <div id="favorites-tab" class="tab-content"><h2 class="section-title">⭐ MEUS FAVORITOS</h2><div class="pokemon-grid" id="favoritesGrid"></div></div>
+
+        <!-- Seletor de Pokémon para Comparação (Modal Especial) -->
+        <div id="compareSelectorModal" class="modal">
+            <div class="modal-content selector-content">
+                <span class="close" onclick="closeCompareSelector()">&times;</span>
+                <h3 id="selectorTitle">Escolha a Região</h3>
+                <div id="regionSelector" class="region-selector-grid"></div>
+                <div id="pokemonSelector" class="pokemon-selector-grid" style="display:none"></div>
+            </div>
+        </div>
 
         <div id="detailModal" class="modal"><div class="modal-content"><span class="close" id="closeModalBtn">&times;</span><div id="detailContent"></div></div></div>
     </div>
