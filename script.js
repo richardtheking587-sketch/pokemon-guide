@@ -37,6 +37,13 @@ function switchTab(tab) {
     const btn = document.getElementById(`btn-${tab}`);
     if (btn) btn.classList.add('active');
 
+    // Resetar filtros ao voltar para a aba pokemon
+    if (tab === 'pokemon') {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('generationFilter').value = '';
+        filterPokemon();
+    }
+
     if (tab === 'favorites') updateFavoritesGrid();
     if (tab === 'items') loadItems();
     if (tab === 'pokeballs') loadPokeballs();
@@ -185,13 +192,14 @@ function updateComparison() {
     }).join('');
 }
 
+// --- ITENS E POKÉBOLAS ---
 async function loadItems() {
     const grid = document.getElementById('itemGrid'); if (!grid) return;
     grid.innerHTML = '<div class="loading">Carregando...</div>';
     try {
         const data = await fetch(`${POKE_API}/item?limit=30`).then(res => res.json());
         const items = await Promise.all(data.results.map(i => fetch(i.url).then(r => r.json())));
-        grid.innerHTML = items.map(i => `<div class="pokemon-card"><img src="${i.sprites.default||''}" style="width:50px"><div>${typeof getTranslatedItemName==='function'?getTranslatedItemName(i.name):i.name}</div></div>`).join('');
+        grid.innerHTML = items.map(i => `<div class="pokemon-card" onclick="showItemDetail('${i.name}')"><img src="${i.sprites.default||''}" style="width:50px"><div>${getTranslatedItemName(i.name)}</div></div>`).join('');
     } catch(e) { grid.innerHTML = "Erro."; }
 }
 
@@ -201,6 +209,23 @@ async function loadPokeballs() {
     try {
         const data = await fetch(`${POKE_API}/item-category/34/`).then(res => res.json());
         const balls = await Promise.all(data.items.map(i => fetch(i.url).then(r => r.json())));
-        grid.innerHTML = balls.map(b => `<div class="pokemon-card"><img src="${b.sprites.default}" style="width:50px"><div>${typeof getTranslatedItemName==='function'?getTranslatedItemName(b.name):b.name}</div></div>`).join('');
+        grid.innerHTML = balls.map(b => `<div class="pokemon-card" onclick="showItemDetail('${b.name}')"><img src="${b.sprites.default}" style="width:50px"><div>${getTranslatedItemName(b.name)}</div></div>`).join('');
     } catch(e) { grid.innerHTML = "Erro."; }
+}
+
+async function showItemDetail(itemName) {
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('detailContent');
+    modal.classList.add('show');
+    content.innerHTML = '<div class="loading">Buscando...</div>';
+    try {
+        const item = await fetch(`${POKE_API}/item/${itemName}`).then(r => r.json());
+        const desc = item.flavor_text_entries.find(e => e.language.name === 'en')?.text || "Sem descrição.";
+        content.innerHTML = `
+            <img src="${item.sprites.default || ''}" style="width:100px">
+            <h2 class="pokemon-name">${getTranslatedItemName(item.name)}</h2>
+            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">${desc}</div>
+            <button class="action-btn" onclick="closeModal()">FECHAR</button>
+        `;
+    } catch (e) { content.innerHTML = "Erro."; }
 }
