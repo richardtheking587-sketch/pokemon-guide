@@ -44,3 +44,41 @@ body { font-family: 'Segoe UI', sans-serif; background-color: #F3F4F6; color: va
 .stat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-red), var(--primary-yellow)); }
 .evolution-chain { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .evolution-item { text-align: center; } .evolution-image img { width: 80px; }
+/* Estilo para o Selo de Raridade no Card */
+.rarity-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 0.7em;
+    font-weight: bold;
+    text-transform: uppercase;
+    z-index: 10;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+/* Estilo para o "Buff" de Raridade dentro do Modal */
+.detail-rarity-buff {
+    display: inline-block;
+    margin: 10px 0;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 2px solid transparent;
+    animation: glow 2s infinite alternate;
+}
+
+/* Cores das Raridades */
+.rarity-comum { background: #7f8c8d; color: white; }
+.rarity-raro { background: #2980b9; color: white; border-color: #3498db; }
+.rarity-lendario { background: #f1c40f; color: black; border-color: #f39c12; }
+.rarity-mitico { background: #9b59b6; color: white; border-color: #8e44ad; }
+
+@keyframes glow {
+    from { box-shadow: 0 0 5px currentColor; }
+    to { box-shadow: 0 0 20px currentColor; }
+}
+
