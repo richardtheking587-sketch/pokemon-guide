@@ -120,10 +120,36 @@ body {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.85); 
+    z-index: 1000; 
+    align-items: center; 
+    justify-content: center;
+    overflow-y: auto; /* Permite rolar a tela se o modal for grande */
+    padding: 20px;
+}
+
 .modal.show { display: flex; }
-.modal-content { background: #0a0a0a; border: 1px solid var(--primary-red); border-radius: 20px; padding: 30px; width: 90%; max-width: 500px; position: relative; text-align: center; }
-.close { position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: #666; }
+
+.modal-content { 
+    background: #0a0a0a; 
+    border: 1px solid var(--primary-red); 
+    border-radius: 20px; 
+    padding: 30px; 
+    width: 100%; 
+    max-width: 500px; 
+    position: relative; 
+    text-align: center;
+    margin: auto; /* Centraliza o modal quando rolar */
+    max-height: 90vh; /* Não deixa o modal passar da altura da tela */
+    overflow-y: auto; /* Permite rolar dentro do modal */
+}
+
+.close { position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: #666; z-index: 10; }
 
 .type-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; color: white; margin: 5px; display: inline-block; }
 .fire { background: #ff4422; } .water { background: #3399ff; } .grass { background: #77cc55; }
