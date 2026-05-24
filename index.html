@@ -14,7 +14,7 @@
         <div class="dev-banner-content">
             <span class="dev-banner-icon">💻</span>
             <span class="dev-badge">EM DESENVOLVIMENTO</span>
-            <span class="dev-banner-text">Este é um <strong>projeto de aprendizado</strong> — estamos aprendendo a programar!</span>
+            <span class="dev-banner-text">Este é um <strong>projeto de aprendizado</strong> — estamos aprendendo a programar e construindo algo incrível!</span>
             <span class="dev-banner-icon">🚀</span>
         </div>
     </div>
@@ -37,12 +37,19 @@
         <main class="content">
             <section id="pokemon-tab" class="tab-content active">
                 <div class="search-box">
-                    <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR</button>
-                    <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
+                    <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR POKÉMON</button>
+                    <input type="text" id="searchInput" placeholder="Buscar Pokémon por nome ou ID...">
                     <select id="generationFilter">
                         <option value="">TODAS AS REGIÕES</option>
-                        <option value="1">Kanto</option><option value="2">Johto</option>
-                        <option value="3">Hoenn</option><option value="4">Sinnoh</option>
+                        <option value="1">Kanto (Geração 1)</option>
+                        <option value="2">Johto (Geração 2)</option>
+                        <option value="3">Hoenn (Geração 3)</option>
+                        <option value="4">Sinnoh (Geração 4)</option>
+                        <option value="5">Unova (Geração 5)</option>
+                        <option value="6">Kalos (Geração 6)</option>
+                        <option value="7">Alola (Geração 7)</option>
+                        <option value="8">Galar (Geração 8)</option>
+                        <option value="9">Paldea (Geração 9)</option>
                     </select>
                 </div>
                 <div id="pokemonGrid" class="pokemon-grid"></div>
@@ -60,9 +67,9 @@
 
             <section id="compare-tab" class="tab-content">
                 <div class="compare-container">
-                    <div class="compare-slot" id="result1" onclick="openCompareSelector(1)"><span>POKÉMON 1</span></div>
+                    <div class="compare-slot" id="result1" onclick="openCompareSelector(1)"><span>SELECIONAR POKÉMON 1</span></div>
                     <div class="vs-circle">VS</div>
-                    <div class="compare-slot" id="result2" onclick="openCompareSelector(2)"><span>POKÉMON 2</span></div>
+                    <div class="compare-slot" id="result2" onclick="openCompareSelector(2)"><span>SELECIONAR POKÉMON 2</span></div>
                 </div>
                 <div id="comparison-stats" class="comparison-stats"></div>
             </section>
@@ -74,21 +81,32 @@
         </main>
 
         <footer class="dev-footer">
-            <p class="dev-footer-text">Projeto de aprendizado em programação. Desenvolvido com <a href="https://pokeapi.co" target="_blank">PokéAPI</a>.</p>
+            <div class="dev-footer-content">
+                <div class="dev-footer-title">🎮 PROJETO DE APRENDIZADO</div>
+                <div class="dev-footer-divider"></div>
+                <p class="dev-footer-text">
+                    Este site foi criado como parte de uma jornada de <strong>aprendizado em programação</strong>.  
+
+                    Desenvolvido com HTML, CSS e JavaScript, consumindo a <a href="https://pokeapi.co" target="_blank">PokéAPI</a>.
+                </p>
+            </div>
         </footer>
     </div>
 
-    <!-- MODAIS -->
     <div id="detailModal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal( )">&times;</span><div id="detailContent"></div></div></div>
-    <div id="compareSelectorModal" class="modal"><div class="modal-content"><span class="close" onclick="closeCompareSelector()">&times;</span><h2 id="selectorTitle">ESCOLHA</h2><div id="regionSelector" class="region-selector-grid"></div><div id="pokemonSelector" class="pokemon-selector-grid" style="display:none"></div></div></div>
-    
-    <!-- TELA DE VITÓRIA -->
+    <div id="compareSelectorModal" class="modal"><div class="modal-content"><span class="close" onclick="closeCompareSelector()">&times;</span><h2 id="selectorTitle" style="font-family:'Orbitron'; margin-bottom:20px">ESCOLHA</h2><div id="regionSelector" class="region-selector-grid"></div><div id="pokemonSelector" class="pokemon-selector-grid" style="display:none"></div></div></div>
+
     <div id="victoryModal">
         <div class="victory-bg"></div>
         <div class="victory-particles" id="victoryParticles"></div>
         <div class="victory-content">
+            <div class="victory-trophy">🏆</div>
             <div class="victory-title">VENCEDOR!</div>
-            <div class="victory-pokemon-frame"><img id="victoryPokemonImg" class="victory-pokemon-img" src=""><div class="victory-pokemon-ring"></div></div>
+            <div class="victory-pokemon-frame">
+                <div class="victory-pokemon-glow"></div>
+                <div class="victory-pokemon-ring"></div>
+                <img id="victoryPokemonImg" class="victory-pokemon-img" src="" alt="Pokémon Vencedor">
+            </div>
             <div id="victoryPokemonName" class="victory-pokemon-name"></div>
             <div id="victoryStatsSummary" class="victory-stats-summary"></div>
             <button class="victory-close-btn" onclick="closeVictoryModal()">CONTINUAR</button>
