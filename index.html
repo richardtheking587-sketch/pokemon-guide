@@ -4,21 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokémon Guide - Elite Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="dev-banner anime-shine">
-        <div class="dev-banner-content">
-            <span class="dev-badge">PROJETO DE ESTUDO</span>
-            <span class="dev-banner-text">Pokémon Guide — Construindo o futuro da programação! 🚀</span>
-        </div>
-    </div>
-
+<body class="dark-theme">
     <div class="container">
         <header class="header">
-            <div class="logo-container" onclick="switchTab('pokemon')" style="cursor:pointer">
-                <div class="spinning-pokeball"></div>
+            <!-- Clicar aqui volta para o início -->
+            <div class="logo-container" onclick="switchTab('pokemon' )" style="cursor:pointer">
+                <div class="pokeball-icon"></div>
                 <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
             </div>
             <nav class="main-nav">
@@ -30,90 +24,64 @@
             </nav>
         </header>
 
-        <main class="content">
-            <section id="pokemon-tab" class="tab-content active">
-                <div class="search-box">
-                    <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR</button>
-                    <input type="text" id="searchInput" placeholder="Nome ou ID...">
-                    <select id="generationFilter">
+        <!-- Aba Pokémon -->
+        <div id="pokemon-tab" class="tab-content active">
+            <div class="top-controls">
+                <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR POKÉMON</button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar Pokémon por nome ou ID...">
+                <div class="filter-controls">
+                    <select id="generationFilter" class="filter-select">
                         <option value="">TODAS AS REGIÕES</option>
-                        <option value="1">Kanto</option>
-                        <option value="2">Johto</option>
-                        <option value="3">Hoenn</option>
-                        <option value="4">Sinnoh</option>
-                        <option value="5">Unova</option>
-                        <option value="6">Kalos</option>
-                        <option value="7">Alola</option>
-                        <option value="8">Galar</option>
-                        <option value="9">Paldea</option>
+                        <option value="1">Kanto</option><option value="2">Johto</option><option value="3">Hoenn</option>
+                        <option value="4">Sinnoh</option><option value="5">Unova</option><option value="6">Kalos</option>
+                        <option value="7">Alola</option><option value="8">Galar</option><option value="9">Paldea</option>
                     </select>
                 </div>
-                <div id="pokemonGrid" class="pokemon-grid"></div>
-            </section>
+            </div>
+            <div class="pokemon-grid" id="pokemonGrid"></div>
+        </div>
 
-            <section id="items-tab" class="tab-content">
-                <h2 class="tab-title">MOCHILA DE ITENS</h2>
-                <div id="itemGrid" class="pokemon-grid"></div>
-            </section>
-
-            <section id="pokeballs-tab" class="tab-content">
-                <h2 class="tab-title">POKÉBOLAS</h2>
-                <div id="pokeballGrid" class="pokemon-grid"></div>
-            </section>
-
-            <section id="compare-tab" class="tab-content">
-                <h2 class="tab-title">⚔️ COMPARAR ATRIBUTOS</h2>
-                <div class="compare-container">
-                    <div class="compare-slot" id="result1" onclick="openCompareSelector(1)">
-                        <div class="slot-placeholder">
-                            <div class="plus-icon">+</div>
-                            <span>POKÉMON 1</span>
-                        </div>
-                    </div>
-                    <div class="vs-circle">VS</div>
-                    <div class="compare-slot" id="result2" onclick="openCompareSelector(2)">
-                        <div class="slot-placeholder">
-                            <div class="plus-icon">+</div>
-                            <span>POKÉMON 2</span>
-                        </div>
+        <!-- Aba Comparar (Novo Sistema) -->
+        <div id="compare-tab" class="tab-content">
+            <h2 class="section-title">⚔️ DUELO DE ESTATÍSTICAS</h2>
+            <div class="compare-container">
+                <div class="compare-slot" id="slot1" onclick="openCompareSelector(1)">
+                    <div id="result1" class="compare-result">
+                        <div class="placeholder-box">?   
+ SELECIONAR POKÉMON 1</div>
                     </div>
                 </div>
-                <div id="comparison-details" class="comparison-details"></div>
-            </section>
-
-            <section id="favorites-tab" class="tab-content">
-                <h2 class="tab-title">⭐ MEUS FAVORITOS</h2>
-                <div id="favoritesGrid" class="pokemon-grid"></div>
-            </section>
-        </main>
-
-        <footer class="dev-footer">
-            <div class="dev-footer-content">
-                <div class="dev-footer-title">ESTUDO DE PROGRAMAÇÃO DESENVOLVIDO POR RICHARD</div>
-                <p class="disclaimer-text">
-                    <strong>AVISO LEGAL:</strong> Este site é um projeto estritamente educacional e de portfólio, sem fins lucrativos. 
-                    Todas as imagens e dados pertencem à Nintendo, Game Freak e The Pokémon Company. 
-                </p>
+                <div class="vs-circle">VS</div>
+                <div class="compare-slot" id="slot2" onclick="openCompareSelector(2)">
+                    <div id="result2" class="compare-result">
+                        <div class="placeholder-box">?   
+ SELECIONAR POKÉMON 2</div>
+                    </div>
+                </div>
             </div>
-        </footer>
-    </div>
-
-    <div id="detailModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="detailContent"></div>
+            <div id="comparison-stats" class="comparison-stats"></div>
         </div>
-    </div>
 
-    <div id="selectorModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeSelector()">&times;</span>
-            <h2 class="selector-title">SELECIONAR</h2>
-            <div id="regionList" class="region-grid"></div>
-            <div id="pokeSelectorList" class="poke-selector-grid" style="display:none"></div>
+        <!-- Outras Abas -->
+        <div id="items-tab" class="tab-content"><h2 class="section-title">🎒 MOCHILA</h2><div class="item-grid" id="itemGrid"></div></div>
+        <div id="pokeballs-tab" class="tab-content"><h2 class="section-title">🔴 POKÉBOLAS</h2><div class="item-grid" id="pokeballGrid"></div></div>
+        <div id="favorites-tab" class="tab-content"><h2 class="section-title">⭐ MEUS FAVORITOS</h2><div class="pokemon-grid" id="favoritesGrid"></div></div>
+
+        <!-- Seletor de Pokémon para Comparação (Modal Especial) -->
+        <div id="compareSelectorModal" class="modal">
+            <div class="modal-content selector-content">
+                <span class="close" onclick="closeCompareSelector()">&times;</span>
+                <h3 id="selectorTitle">Escolha a Região</h3>
+                <div id="regionSelector" class="region-selector-grid"></div>
+                <div id="pokemonSelector" class="pokemon-selector-grid" style="display:none"></div>
+            </div>
         </div>
-    </div>
 
+        <div id="detailModal" class="modal"><div class="modal-content"><span class="close" id="closeModalBtn">&times;</span><div id="detailContent"></div></div></div>
+    </div>
+    <script src="translations.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
