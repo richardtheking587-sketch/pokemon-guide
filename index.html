@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <audio id="victorySound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
-
     <div class="dev-banner anime-shine">
         <div class="dev-banner-content">
             <span class="dev-badge">PROJETO DE ESTUDO</span>
@@ -95,43 +93,24 @@
                 <p class="disclaimer-text">
                     <strong>AVISO LEGAL:</strong> Este site é um projeto estritamente educacional e de portfólio, sem fins lucrativos. 
                     Todas as imagens e dados pertencem à Nintendo, Game Freak e The Pokémon Company. 
-                    O uso de ativos é feito sob a doutrina de "Uso Justo" (Fair Use) para fins de aprendizado e crítica.
                 </p>
             </div>
         </footer>
     </div>
 
-    <!-- MODAIS -->
     <div id="detailModal" class="modal">
-        <div class="modal-content detail-modal-content">
+        <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <div id="detailContent"></div>
         </div>
     </div>
 
     <div id="selectorModal" class="modal">
-        <div class="modal-content selector-modal-content">
+        <div class="modal-content">
             <span class="close" onclick="closeSelector()">&times;</span>
-            <div id="selectorView">
-                <h2 class="selector-title">SELECIONAR</h2>
-                <div id="regionList" class="region-grid"></div>
-                <div id="pokeSelectorList" class="poke-selector-grid" style="display:none"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="victoryModal" class="modal">
-        <div class="victory-card">
-            <div class="victory-header">VENCEDOR!</div>
-            <div class="victory-body">
-                <div class="victory-ring-container">
-                    <div class="victory-ring"></div>
-                    <img id="victoryImg" src="" alt="Vencedor">
-                </div>
-                <h2 id="victoryName"></h2>
-                <p id="victoryReason"></p>
-            </div>
-            <button class="action-btn" onclick="closeVictoryModal()">FECHAR</button>
+            <h2 class="selector-title">SELECIONAR</h2>
+            <div id="regionList" class="region-grid"></div>
+            <div id="pokeSelectorList" class="poke-selector-grid" style="display:none"></div>
         </div>
     </div>
 
