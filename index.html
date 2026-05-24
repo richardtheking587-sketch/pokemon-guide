@@ -6,7 +6,7 @@
     <title>Pokémon Guide - Elite Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* ESTILO ELITE EDITION INTEGRADO */
+        /* ESTILO ELITE EDITION COMPLETO */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #050505; --card-bg: #111111; --primary-red: #ff1f1f;
@@ -49,8 +49,8 @@
         .type-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; color: white; margin: 5px; display: inline-block; }
         .fire { background: #ff4422; } .water { background: #3399ff; } .grass { background: #77cc55; } .poison { background: #aa5599; }
         .compare-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap; }
-        .compare-slot { width: 220px; height: 300px; background: var(--card-bg); border: 2px dashed #444; border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .vs-circle { width: 60px; height: 60px; background: var(--primary-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-weight: bold; }
+        .compare-slot { width: 220px; height: 300px; background: var(--card-bg); border: 2px dashed #444; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 10px; }
+        .vs-circle { width: 60px; height: 60px; background: var(--primary-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-weight: bold; box-shadow: var(--neon-red); }
         .comparison-stats { width: 100%; max-width: 700px; margin: 30px auto; background: #0a0a0a; padding: 20px; border-radius: 15px; border: 1px solid #222; }
         .stat-row { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; margin-bottom: 10px; text-align: center; }
         .winner { color: var(--accent-gold); text-shadow: 0 0 10px var(--accent-gold); }
@@ -103,9 +103,9 @@
 
             <section id="compare-tab" class="tab-content">
                 <div class="compare-container">
-                    <div class="compare-slot" id="result1" onclick="openCompareSelector(1)"><span>SELECIONAR</span></div>
+                    <div class="compare-slot" id="result1" onclick="openCompareSelector(1)"><span>SELECIONAR POKÉMON 1</span></div>
                     <div class="vs-circle">VS</div>
-                    <div class="compare-slot" id="result2" onclick="openCompareSelector(2)"><span>SELECIONAR</span></div>
+                    <div class="compare-slot" id="result2" onclick="openCompareSelector(2)"><span>SELECIONAR POKÉMON 2</span></div>
                 </div>
                 <div id="comparison-stats" class="comparison-stats"></div>
             </section>
@@ -190,7 +190,7 @@
             const modal = document.getElementById('detailModal');
             const content = document.getElementById('detailContent');
             modal.classList.add('show');
-            content.innerHTML = '<div style="padding:40px">Sincronizando Dados...</div>';
+            content.innerHTML = '<div style="padding:40px">Sincronizando...</div>';
             try {
                 const res = await fetch(POKE_API + '/pokemon/' + id).then(r => r.json());
                 const species = await fetch(POKE_API + '/pokemon-species/' + id).then(r => r.json());
@@ -233,7 +233,7 @@ ${typeData.damage_relations.double_damage_to.map(t => t.name.toUpperCase()).join
                         <button class="action-btn" onclick="closeModal()">FECHAR</button>
                     </div>
                 `;
-            } catch (e) { content.innerHTML = "Erro ao carregar."; }
+            } catch (e) { content.innerHTML = "Erro."; }
         }
 
         function toggleShiny(n, s) { const img = document.getElementById('modal-img'); img.src = img.src === n ? s : n; }
@@ -249,23 +249,49 @@ ${typeData.damage_relations.double_damage_to.map(t => t.name.toUpperCase()).join
         }
 
         async function loadItems() {
-            const grid = document.getElementById('itemGrid'); grid.innerHTML = '...';
+            const grid = document.getElementById('itemGrid'); grid.innerHTML = 'Carregando...';
             const data = await fetch(POKE_API + '/item?limit=100').then(r => r.json());
             const items = await Promise.all(data.results.map(i => fetch(i.url).then(r => r.json())));
             const filtered = items.filter(i => i.category.name !== 'standard-balls' && i.category.name !== 'special-balls');
-            grid.innerHTML = filtered.map(i => `<div class="pokemon-card"><img src="${i.sprites.default||''}" style="width:40px"><div>${i.name.toUpperCase()}</div></div>`).join('');
+            grid.innerHTML = filtered.map(i => `
+                <div class="pokemon-card" onclick="showItemDetail('${i.name}')">
+                    <img src="${i.sprites.default||''}" style="width:50px">
+                    <div style="font-size:0.7em">${i.name.toUpperCase()}</div>
+                </div>
+            `).join('');
         }
 
         async function loadPokeballs() {
-            const grid = document.getElementById('pokeballGrid'); grid.innerHTML = '...';
+            const grid = document.getElementById('pokeballGrid'); grid.innerHTML = 'Carregando...';
             const data = await fetch(POKE_API + '/item-category/34/').then(r => r.json());
             const balls = await Promise.all(data.items.map(i => fetch(i.url).then(r => r.json())));
-            grid.innerHTML = balls.map(b => `<div class="pokemon-card"><img src="${b.sprites.default}" style="width:40px"><div>${b.name.toUpperCase()}</div></div>`).join('');
+            grid.innerHTML = balls.map(b => `
+                <div class="pokemon-card" onclick="showItemDetail('${b.name}')">
+                    <img src="${b.sprites.default}" style="width:50px">
+                    <div style="font-size:0.7em">${b.name.toUpperCase()}</div>
+                </div>
+            `).join('');
+        }
+
+        async function showItemDetail(name) {
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailContent');
+            modal.classList.add('show'); content.innerHTML = 'Carregando...';
+            const item = await fetch(POKE_API + '/item/' + name).then(r => r.json());
+            const desc = item.flavor_text_entries.find(e => e.language.name === 'en')?.text || "Sem descrição.";
+            content.innerHTML = `
+                <img src="${item.sprites.default||''}" style="width:100px">
+                <h2>${item.name.toUpperCase()}</h2>
+                <p style="margin:20px; color:#ccc">${desc}</p>
+                <button class="action-btn" onclick="closeModal()">FECHAR</button>
+            `;
         }
 
         function openCompareSelector(slot) { activeSlot = slot; document.getElementById('compareSelectorModal').classList.add('show'); showRegions(); }
         function closeCompareSelector() { document.getElementById('compareSelectorModal').classList.remove('show'); }
         function showRegions() {
+            document.getElementById('regionSelector').style.display = 'grid';
+            document.getElementById('pokemonSelector').style.display = 'none';
             const reg = document.getElementById('regionSelector');
             reg.innerHTML = Object.keys(generationRanges).map(gen => `<button class="selector-btn" onclick="showPokemonByRegion(${gen})">${generationRanges[gen].name}</button>`).join('');
         }
@@ -273,7 +299,8 @@ ${typeData.damage_relations.double_damage_to.map(t => t.name.toUpperCase()).join
             document.getElementById('regionSelector').style.display = 'none';
             const pSel = document.getElementById('pokemonSelector'); pSel.style.display = 'grid';
             const pokes = allPokemon.filter(p => p.id >= generationRanges[gen].start && p.id <= generationRanges[gen].end);
-            pSel.innerHTML = pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}"></div>`).join('');
+            pSel.innerHTML = `<button class="selector-btn" style="grid-column:1/-1" onclick="showRegions()">⬅ VOLTAR PARA REGIÕES</button>` + 
+                pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}"></div>`).join('');
         }
         async function selectForCompare(id) {
             const p = allPokemon.find(poke => poke.id === id);
@@ -291,7 +318,13 @@ ${typeData.damage_relations.double_damage_to.map(t => t.name.toUpperCase()).join
                     <div style="font-size:0.6em; color:#666">${s.stat.name.toUpperCase()}</div>
                     <div class="stat-val ${s2[i].base_stat > s.base_stat ? 'winner' : ''}">${s2[i].base_stat}</div>
                 </div>
-            `).join('');
+            `).join('') + `<button class="action-btn" style="width:100%; margin-top:20px" onclick="battleFight()">🔥 FIGHT!</button>`;
+        }
+        function battleFight() {
+            const t1 = compareSlots[1].stats.reduce((a, s) => a + s.base_stat, 0);
+            const t2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
+            const winner = t1 > t2 ? compareSlots[1].name : compareSlots[2].name;
+            alert('O VENCEDOR DA LUTA É: ' + winner.toUpperCase() + '! 🏆');
         }
     </script>
 </body>
