@@ -106,7 +106,6 @@ async function showDetail(id) {
         const species = await fetch(d.species.url).then(res => res.json());
         const evoData = await fetch(species.evolution_chain.url).then(res => res.json());
         
-        // Função recursiva para pegar todas as evoluções (incluindo ramificações como as do Eevee)
         function getEvolutions(chain) {
             let evos = [];
             const evoId = chain.species.url.split('/').filter(Boolean).pop();
@@ -136,11 +135,11 @@ async function showDetail(id) {
 
             <div class="evolution-chain" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
                 <h3 style="font-family:Orbitron; font-size:0.9em; margin-bottom:15px;">LINHA EVOLUTIVA</h3>
-                <div style="display:flex; justify-content:center; align-items:center; gap:15px; flex-wrap:wrap;">
+                <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
                     ${allEvos.map((evo, index) => `
-                        <div style="text-align:center; cursor:pointer" onclick="showDetail(${evo.id})">
-                            <img src="${evo.image}" style="width:55px; border-radius:50%; background:rgba(255,255,255,0.05); padding:5px; border:1px solid rgba(241,196,15,0.2);">
-                            <div style="font-size:9px; margin-top:5px; color:#f1c40f">${evo.name.toUpperCase()}</div>
+                        <div style="text-align:center; cursor:pointer; min-width:70px;" onclick="showDetail(${evo.id})">
+                            <img src="${evo.image}" style="width:50px; border-radius:50%; background:rgba(255,255,255,0.05); padding:5px; border:1px solid ${evo.id == id ? '#f1c40f' : 'rgba(255,255,255,0.1)'};">
+                            <div style="font-size:8px; margin-top:5px; color:${evo.id == id ? '#f1c40f' : '#888'}">${evo.name.toUpperCase()}</div>
                         </div>
                     `).join('')}
                 </div>
