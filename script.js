@@ -20,7 +20,15 @@ const statTranslations = {
     'special-attack': 'Atq. Especial', 'special-defense': 'Def. Especial', 'speed': 'Velocidade'
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+const typeTranslations = {
+    'normal': 'Normal', 'fire': 'Fogo', 'water': 'Água', 'grass': 'Planta',
+    'electric': 'Elétrico', 'ice': 'Gelo', 'fighting': 'Lutador', 'poison': 'Venenoso',
+    'ground': 'Terra', 'flying': 'Voador', 'psychic': 'Psíquico', 'bug': 'Inseto',
+    'rock': 'Pedra', 'ghost': 'Fantasma', 'dragon': 'Dragão', 'dark': 'Sombrio',
+    'steel': 'Aço', 'fairy': 'Fada'
+};
+
+document.addEventListener('DOMContentLoaded', ( ) => {
     loadPokemon();
     setupEvents();
 });
@@ -59,8 +67,8 @@ async function loadPokemon() {
         allPokemon = data.results.map((p, index) => ({
             id: index + 1,
             name: p.name,
-            image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + (index + 1) + '.png',
-            shiny: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/' + (index + 1) + '.png',
+            image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + (index + 1 ) + '.png',
+            shiny: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/' + (index + 1 ) + '.png',
             types: [],
             stats: []
         }));
@@ -95,9 +103,7 @@ function isFavorited(id) {
 }
 
 function toggleFavoriteCard(event, id) {
-    // Impede que o clique no botão abra o modal de detalhes
     event.stopPropagation();
-
     let favs = getFavorites();
     const btn = event.currentTarget;
     const card = btn.closest('.pokemon-card');
@@ -133,7 +139,6 @@ function toggleFavorite(id) {
     filterPokemon();
 }
 
-// Toast de notificação de favorito
 function showFavToast(msg, added) {
     let toast = document.getElementById('favToast');
     if (!toast) {
@@ -225,7 +230,7 @@ async function showDetail(id) {
         content.innerHTML = `
             <img id="modal-img" src="${p.image}" style="width:180px">
             <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
-            <div class="types-container">${p.types.map(t => `<span class="type-badge ${t}">${t.toUpperCase()}</span>`).join('')}</div>
+            <div class="types-container">${p.types.map(t => `<span class="type-badge ${t}">${(typeTranslations[t] || t).toUpperCase()}</span>`).join('')}</div>
             
             <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
                 ${typeof translateDescription === 'function' ? translateDescription(desc) : desc.replace(/\f/g, ' ')}
@@ -233,12 +238,14 @@ async function showDetail(id) {
 
             <div class="battle-info" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0; font-size:0.8em;">
                 <div style="background:#222; padding:10px; border-radius:8px;">
-                    <strong style="color:#ff4422">FRAQUEZAS</strong><br>
-                    ${weaknesses.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${t.toUpperCase()}</span>`).join(' ')}
+                    <strong style="color:#ff4422">FRAQUEZAS</strong>  
+
+                    ${weaknesses.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${(typeTranslations[t] || t).toUpperCase()}</span>`).join(' ')}
                 </div>
                 <div style="background:#222; padding:10px; border-radius:8px;">
-                    <strong style="color:#77cc55">VANTAGENS</strong><br>
-                    ${strengths.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${t.toUpperCase()}</span>`).join(' ')}
+                    <strong style="color:#77cc55">VANTAGENS</strong>  
+
+                    ${strengths.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${(typeTranslations[t] || t).toUpperCase()}</span>`).join(' ')}
                 </div>
             </div>
 
@@ -247,7 +254,7 @@ async function showDetail(id) {
                 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:10px;">
                     ${evolutions.map((evo, i) => `
                         <div style="text-align:center">
-                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${evo.id}.png" style="width:50px; cursor:pointer" onclick="showDetail(${evo.id})">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${evo.id}.png" style="width:50px; cursor:pointer" onclick="showDetail(${evo.id} )">
                             <div style="font-size:0.6em">${evo.name.toUpperCase()}</div>
                         </div>
                         ${i < evolutions.length - 1 ? '<span style="color:#444">➔</span>' : ''}
@@ -291,7 +298,8 @@ function updateFavoritesGrid() {
     const grid = document.getElementById('favoritesGrid');
     if (!grid) return;
     if (!favs.length) {
-        grid.innerHTML = '<p style="grid-column:1/-1; color:#555; text-align:center; font-family:Orbitron; font-size:0.8em; padding:40px;">Nenhum favorito ainda.<br><span style="color:#333; font-size:0.8em">Clique na ⭐ nos cards para favoritar!</span></p>';
+        grid.innerHTML = '<p style="grid-column:1/-1; color:#555; text-align:center; font-family:Orbitron; font-size:0.8em; padding:40px;">Nenhum favorito ainda.  
+<span style="color:#333; font-size:0.8em">Clique na ⭐ nos cards para favoritar!</span></p>';
         return;
     }
     grid.innerHTML = allPokemon.filter(p => favs.includes(p.id)).map(p => `
@@ -314,7 +322,8 @@ function showRegions() {
     const reg = document.getElementById('regionSelector');
     reg.style.display = 'grid';
     reg.innerHTML = Object.keys(generationRanges).map(gen => `
-        <button class="selector-btn" onclick="showPokemonByRegion(${gen})">${generationRanges[gen].name.toUpperCase()}<br><small>Geração ${gen}</small></button>
+        <button class="selector-btn" onclick="showPokemonByRegion(${gen})">${generationRanges[gen].name.toUpperCase()}  
+<small>Geração ${gen}</small></button>
     `).join('');
 }
 
@@ -371,11 +380,9 @@ function battleResult() {
     } else if (total2 > total1) {
         winner = p2; loser = p1; winnerTotal = total2; loserTotal = total1;
     } else {
-        // Empate
         showVictoryModal(null, total1, total2);
         return;
     }
-
     showVictoryModal(winner, winnerTotal, loserTotal, loser);
 }
 
@@ -386,7 +393,6 @@ function showVictoryModal(winner, total1, total2, loser) {
     const statsEl = document.getElementById('victoryStatsSummary');
 
     if (!winner) {
-        // Empate
         img.src = compareSlots[1].image;
         nameEl.textContent = 'EMPATE!';
         statsEl.innerHTML = `<strong>Total de Stats:</strong> ${total1} × ${total2} — Igualmente poderosos!`;
@@ -397,9 +403,7 @@ function showVictoryModal(winner, total1, total2, loser) {
         statsEl.innerHTML = `<strong>Total de Stats:</strong> ${total1} pts &nbsp;|&nbsp; Vantagem: +${diff} sobre ${loser.name.toUpperCase()}`;
     }
 
-    // Gera partículas
     generateParticles();
-
     modal.classList.add('show');
     modal.style.display = 'flex';
 }
