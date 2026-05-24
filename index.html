@@ -8,21 +8,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <!-- BANNER DE APRENDIZADO -->
     <div class="dev-banner">
         <div class="dev-banner-content">
-            <span class="dev-banner-icon">💻</span>
-            <span class="dev-badge">EM DESENVOLVIMENTO</span>
-            <span class="dev-banner-text">Este é um <strong>projeto de aprendizado</strong> — estamos aprendendo a programar e construindo algo incrível!</span>
-            <span class="dev-banner-icon">🚀</span>
+            <span class="dev-badge">PROJETO DE APRENDIZADO</span>
+            <span class="dev-banner-text">Pokémon Guide — Versão Final e Corrigida! 🚀</span>
         </div>
     </div>
 
     <div class="container">
         <header class="header">
             <div class="logo-container" onclick="switchTab('pokemon')" style="cursor:pointer">
-                <div class="pokeball-icon"></div>
                 <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
             </div>
             <nav class="main-nav">
@@ -37,8 +32,8 @@
         <main class="content">
             <section id="pokemon-tab" class="tab-content active">
                 <div class="search-box">
-                    <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR POKÉMON</button>
-                    <input type="text" id="searchInput" placeholder="Buscar Pokémon por nome ou ID...">
+                    <button class="action-btn" onclick="randomPokemon()">🎲 SORTEAR</button>
+                    <input type="text" id="searchInput" placeholder="Nome ou ID...">
                     <select id="generationFilter">
                         <option value="">TODAS AS REGIÕES</option>
                         <option value="1">Kanto</option>
@@ -56,45 +51,40 @@
             </section>
 
             <section id="items-tab" class="tab-content">
-                <h2 style="text-align:center; margin-bottom:20px; font-family:'Orbitron'">MOCHILA DE ITENS</h2>
+                <h2 class="tab-title">MOCHILA DE ITENS</h2>
                 <div id="itemGrid" class="pokemon-grid"></div>
             </section>
 
             <section id="pokeballs-tab" class="tab-content">
-                <h2 style="text-align:center; margin-bottom:20px; font-family:'Orbitron'">POKÉBOLAS</h2>
+                <h2 class="tab-title">POKÉBOLAS</h2>
                 <div id="pokeballGrid" class="pokemon-grid"></div>
             </section>
 
             <section id="compare-tab" class="tab-content">
-                <h2 style="text-align:center; margin-bottom:20px; font-family:'Orbitron'">⚔️ COMPARAR POKÉMONS</h2>
+                <h2 class="tab-title">⚔️ COMPARAR ATRIBUTOS</h2>
                 <div class="compare-container">
                     <div class="compare-slot" id="result1" onclick="openCompareSelector(1)">
-                        <span>SELECIONAR POKÉMON 1</span>
+                        <div class="slot-placeholder">
+                            <div class="plus-icon">+</div>
+                            <span>ESCOLHER POKÉMON 1</span>
+                        </div>
                     </div>
                     <div class="vs-circle">VS</div>
                     <div class="compare-slot" id="result2" onclick="openCompareSelector(2)">
-                        <span>SELECIONAR POKÉMON 2</span>
+                        <div class="slot-placeholder">
+                            <div class="plus-icon">+</div>
+                            <span>ESCOLHER POKÉMON 2</span>
+                        </div>
                     </div>
                 </div>
-                <div id="comparison-stats" class="comparison-stats"></div>
+                <div id="comparison-details" class="comparison-details"></div>
             </section>
 
             <section id="favorites-tab" class="tab-content">
-                <h2 style="text-align:center; margin-bottom:20px; font-family:'Orbitron'">⭐ MEUS FAVORITOS</h2>
+                <h2 class="tab-title">⭐ MEUS FAVORITOS</h2>
                 <div id="favoritesGrid" class="pokemon-grid"></div>
             </section>
         </main>
-
-        <footer class="dev-footer">
-            <div class="dev-footer-content">
-                <div class="dev-footer-title">🎮 PROJETO DE APRENDIZADO</div>
-                <div class="dev-footer-divider"></div>
-                <p class="dev-footer-text">
-                    Este site foi criado como parte de uma jornada de aprendizado em programação.
-                    Desenvolvido com HTML, CSS e JavaScript, consumindo a <a href="https://pokeapi.co" target="_blank">PokéAPI</a>.
-                </p>
-            </div>
-        </footer>
     </div>
 
     <!-- MODAIS -->
@@ -105,29 +95,27 @@
         </div>
     </div>
 
-    <div id="compareSelectorModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeCompareSelector()">&times;</span>
-            <h2 id="selectorTitle" style="font-family:'Orbitron'; margin-bottom:20px">ESCOLHA</h2>
-            <div id="regionSelector" class="region-selector-grid"></div>
-            <div id="pokemonSelector" class="pokemon-selector-grid" style="display:none"></div>
+    <div id="selectorModal" class="modal">
+        <div class="modal-content selector-modal-content">
+            <span class="close" onclick="closeSelector()">&times;</span>
+            <div id="selectorView">
+                <h2 class="selector-title">SELECIONAR</h2>
+                <div id="regionList" class="region-grid"></div>
+                <div id="pokeSelectorList" class="poke-selector-grid" style="display:none"></div>
+            </div>
         </div>
     </div>
 
-    <div id="victoryModal">
-        <div class="victory-bg"></div>
-        <div class="victory-particles" id="victoryParticles"></div>
-        <div class="victory-content">
-            <div class="victory-trophy">🏆</div>
-            <div class="victory-title">VENCEDOR!</div>
-            <div class="victory-pokemon-frame">
-                <div class="victory-pokemon-glow"></div>
-                <div class="victory-pokemon-ring"></div>
-                <img id="victoryPokemonImg" class="victory-pokemon-img" src="" alt="Vencedor">
+    <div id="victoryModal" class="modal">
+        <div class="victory-card">
+            <div class="victory-header">VENCEDOR!</div>
+            <div class="victory-body">
+                <div class="victory-ring"></div>
+                <img id="victoryImg" src="" alt="Vencedor">
+                <h2 id="victoryName"></h2>
+                <p id="victoryReason"></p>
             </div>
-            <div id="victoryPokemonName" class="victory-pokemon-name"></div>
-            <div id="victoryStatsSummary" class="victory-stats-summary"></div>
-            <button class="victory-close-btn" onclick="closeVictoryModal()">CONTINUAR</button>
+            <button class="action-btn" onclick="closeVictoryModal()">FECHAR</button>
         </div>
     </div>
 
