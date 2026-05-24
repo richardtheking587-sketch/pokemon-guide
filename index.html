@@ -27,7 +27,6 @@
             </div>
             <nav class="main-nav">
                 <button class="nav-btn active" id="btn-pokemon" onclick="switchTab('pokemon')">POKÉMON</button>
-                <button class="nav-btn" id="btn-shiny" onclick="switchTab('shiny')">✨ SHINY</button>
                 <button class="nav-btn" id="btn-items" onclick="switchTab('items')">ITENS</button>
                 <button class="nav-btn" id="btn-pokeballs" onclick="switchTab('pokeballs')">POKÉBOLAS</button>
                 <button class="nav-btn" id="btn-compare" onclick="switchTab('compare')">⚔️ COMPARAR</button>
@@ -54,15 +53,6 @@
                     </select>
                 </div>
                 <div id="pokemonGrid" class="pokemon-grid"></div>
-            </section>
-
-            <section id="shiny-tab" class="tab-content">
-                <div class="search-box">
-                    <h2 style="text-align:center; margin-bottom:20px; font-family:'Orbitron'; width:100%">✨ POKÉMONS SHINY ✨</h2>
-                    <button class="action-btn" onclick="randomShinyPokemon()">🎲 SORTEAR SHINY</button>
-                    <input type="text" id="shinySearchInput" placeholder="Buscar Pokémon Shiny...">
-                </div>
-                <div id="shinyGrid" class="pokemon-grid"></div>
             </section>
 
             <section id="items-tab" class="tab-content">
