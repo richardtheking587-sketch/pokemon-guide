@@ -6,23 +6,13 @@
     <title>Pokémon Guide - Elite Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* ESTILO GLOBAL INFALÍVEL */
+        /* ESTILO INTEGRADO */
         html, body { background-color: #050505 !important; color: white !important; margin: 0; padding: 0; min-height: 100vh; }
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            background-image: 
-                linear-gradient(rgba(255, 31, 31, 0.05 ) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 31, 31, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-        }
+        body { font-family: 'Roboto', sans-serif; background-image: linear-gradient(rgba(255, 31, 31, 0.05 ) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 31, 31, 0.05) 1px, transparent 1px); background-size: 50px 50px; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .header { padding: 30px; text-align: center; border-bottom: 2px solid #ff1f1f; margin-bottom: 30px; background: rgba(0,0,0,0.9); }
-        .pokeball-icon {
-            width: 50px; height: 50px; border: 3px solid #fff; border-radius: 50%;
-            position: relative; cursor: pointer; box-shadow: 0 0 15px #fff;
-            animation: spin-anti 4s linear infinite; margin: 0 auto 10px;
-        }
+        .pokeball-icon { width: 50px; height: 50px; border: 3px solid #fff; border-radius: 50%; position: relative; cursor: pointer; box-shadow: 0 0 15px #fff; animation: spin-anti 4s linear infinite; margin: 0 auto 10px; }
         @keyframes spin-anti { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
         .pokeball-icon::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: #fff; transform: translateY(-50%); }
         .pokeball-icon::after { content: ''; position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; background: #000; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); }
@@ -131,7 +121,134 @@
         </div>
     </div>
 
-    <script src="translations.js"></script>
-    <script src="script.js"></script>
+    <script>
+        /* JAVASCRIPT INTEGRADO INFALÍVEL */
+        const POKE_API = 'https://pokeapi.co/api/v2';
+        let allPokemon = [];
+        let compareSlots = { 1: null, 2: null };
+        let activeSlot = 1;
+
+        const generationRanges = {
+            1: { start: 1, end: 151, name: "Kanto" },
+            2: { start: 152, end: 251, name: "Johto" },
+            3: { start: 252, end: 386, name: "Hoenn" },
+            4: { start: 387, end: 493, name: "Sinnoh" },
+            5: { start: 494, end: 649, name: "Unova" },
+            6: { start: 650, end: 721, name: "Kalos" },
+            7: { start: 722, end: 809, name: "Alola" },
+            8: { start: 810, end: 905, name: "Galar" },
+            9: { start: 906, end: 1025, name: "Paldea" }
+        };
+
+        document.addEventListener('DOMContentLoaded', ( ) => { loadPokemon(); setupEvents(); });
+
+        function setupEvents() {
+            const s = document.getElementById('searchInput');
+            const g = document.getElementById('generationFilter');
+            if (s) s.addEventListener('input', filterPokemon);
+            if (g) g.addEventListener('change', filterPokemon);
+        }
+
+        async function loadPokemon() {
+            try {
+                const r = await fetch(POKE_API + '/pokemon?limit=1025');
+                const d = await r.json();
+                allPokemon = d.results.map((p, i) => ({
+                    id: i + 1, name: p.name,
+                    image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + (i + 1 ) + '.png',
+                    shiny: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/' + (i + 1 ) + '.png',
+                    types: [], stats: []
+                }));
+                filterPokemon();
+            } catch (e) { console.error(e); }
+        }
+
+        function filterPokemon() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const gen = document.getElementById('generationFilter').value;
+            const filtered = allPokemon.filter(p => {
+                const mSearch = p.name.includes(term) || String(p.id).includes(term);
+                const mGen = !gen || (p.id >= generationRanges[gen].start && p.id <= generationRanges[gen].end);
+                return mSearch && mGen;
+            });
+            const grid = document.getElementById('pokemonGrid');
+            if (grid) {
+                grid.innerHTML = filtered.map(p => `
+                    <div class="pokemon-card" onclick="showDetail(${p.id})">
+                        <div class="pokemon-image"><img src="${p.image}" loading="lazy"></div>
+                        <div class="pokemon-name">${p.name.toUpperCase()}</div>
+                        <div class="pokemon-id">#${String(p.id).padStart(4, '0')}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function showDetail(id) {
+            const p = allPokemon.find(poke => poke.id === id);
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailContent');
+            modal.classList.add('show');
+            content.innerHTML = '<div class="loading">Carregando...</div>';
+            try {
+                const res = await fetch(POKE_API + '/pokemon/' + id).then(r => r.json());
+                const species = await fetch(POKE_API + '/pokemon-species/' + id).then(r => r.json());
+                const desc = species.flavor_text_entries.find(e => e.language.name === 'en')?.flavor_text || "";
+                
+                content.innerHTML = `
+                    <img src="${p.image}" style="width:150px">
+                    <h2>${p.name.toUpperCase()}</h2>
+                    <div>${res.types.map(t => `<span class="type-badge ${t.type.name}">${t.type.name.toUpperCase()}</span>`).join('')}</div>
+                    <p style="margin:15px; font-size:0.9em; color:#ccc">${desc.replace(/\f/g, ' ')}</p>
+                    <button class="action-btn" onclick="closeModal()">FECHAR</button>
+                `;
+            } catch (e) { content.innerHTML = "Erro."; }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            document.getElementById('btn-' + tab).classList.add('active');
+            if (tab === 'items') loadItems();
+            if (tab === 'pokeballs') loadPokeballs();
+        }
+
+        function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
+        function randomPokemon() { showDetail(Math.floor(Math.random() * 1025) + 1); }
+
+        async function loadItems() {
+            const grid = document.getElementById('itemGrid');
+            grid.innerHTML = '<div class="loading">...</div>';
+            const data = await fetch(POKE_API + '/item?limit=30').then(r => r.json());
+            grid.innerHTML = data.results.map(i => `<div class="pokemon-card"><div>${i.name.toUpperCase()}</div></div>`).join('');
+        }
+
+        async function loadPokeballs() {
+            const grid = document.getElementById('pokeballGrid');
+            grid.innerHTML = '<div class="loading">...</div>';
+            const data = await fetch(POKE_API + '/item-category/34/').then(r => r.json());
+            grid.innerHTML = data.items.map(i => `<div class="pokemon-card"><div>${i.name.toUpperCase()}</div></div>`).join('');
+        }
+
+        function openCompareSelector(slot) { activeSlot = slot; document.getElementById('compareSelectorModal').classList.add('show'); showRegions(); }
+        function closeCompareSelector() { document.getElementById('compareSelectorModal').classList.remove('show'); }
+        function showRegions() {
+            const reg = document.getElementById('regionSelector');
+            reg.innerHTML = Object.keys(generationRanges).map(gen => `<button class="selector-btn" onclick="showPokemonByRegion(${gen})">${generationRanges[gen].name}</button>`).join('');
+        }
+        function showPokemonByRegion(gen) {
+            document.getElementById('regionSelector').style.display = 'none';
+            const pSel = document.getElementById('pokemonSelector');
+            pSel.style.display = 'grid';
+            const pokes = allPokemon.filter(p => p.id >= generationRanges[gen].start && p.id <= generationRanges[gen].end);
+            pSel.innerHTML = pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}"></div>`).join('');
+        }
+        function selectForCompare(id) {
+            const p = allPokemon.find(poke => poke.id === id);
+            compareSlots[activeSlot] = p;
+            document.getElementById('result' + activeSlot).innerHTML = `<img src="${p.image}" style="width:100px">`;
+            closeCompareSelector();
+        }
+    </script>
 </body>
 </html>
