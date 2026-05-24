@@ -133,41 +133,41 @@ async function showDetail(id) {
         content.innerHTML = `
             <img id="modal-img" src="${p.image}" style="width:180px">
             <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
-            <div class="types-container">${p.types.map(t => `<span class="type-badge ${t}">${t.toUpperCase()}</span>`).join('')}</div>
+            <div class="types-container">${p.types.map(t => \`<span class="type-badge \${t}">\${t.toUpperCase()}</span>\`).join('')}</div>
             
             <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
-                ${typeof translateDescription === 'function' ? translateDescription(desc) : desc.replace(/\f/g, ' ')}
+                \${typeof translateDescription === 'function' ? translateDescription(desc) : desc.replace(/\\f/g, ' ')}
             </div>
 
             <div class="battle-info" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0; font-size:0.8em;">
                 <div style="background:#222; padding:10px; border-radius:8px;">
                     <strong style="color:#ff4422">FRAQUEZAS</strong>  
 
-                    ${weaknesses.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${t.toUpperCase()}</span>`).join(' ')}
+                    \${weaknesses.map(t => \`<span class="type-badge \${t}" style="padding:2px 5px; font-size:0.7em">\${t.toUpperCase()}</span>\`).join(' ')}
                 </div>
                 <div style="background:#222; padding:10px; border-radius:8px;">
                     <strong style="color:#77cc55">VANTAGENS</strong>  
 
-                    ${strengths.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${t.toUpperCase()}</span>`).join(' ')}
+                    \${strengths.map(t => \`<span class="type-badge \${t}" style="padding:2px 5px; font-size:0.7em">\${t.toUpperCase()}</span>\`).join(' ')}
                 </div>
             </div>
 
             <div class="evolution-chain" style="margin-top:20px;">
                 <strong style="font-size:0.8em; color:var(--accent-gold)">LINHA EVOLUTIVA</strong>
                 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:10px;">
-                    ${evolutions.map((evo, i) => `
+                    \${evolutions.map((evo, i) => \`
                         <div style="text-align:center">
-                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${evo.id}.png" style="width:50px; cursor:pointer" onclick="showDetail(${evo.id} )">
-                            <div style="font-size:0.6em">${evo.name.toUpperCase()}</div>
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${evo.id}.png" style="width:50px; cursor:pointer" onclick="showDetail(\${evo.id} )">
+                            <div style="font-size:0.6em">\${evo.name.toUpperCase()}</div>
                         </div>
-                        ${i < evolutions.length - 1 ? '<span style="color:#444">➔</span>' : ''}
-                    `).join('')}
+                        \${i < evolutions.length - 1 ? '<span style="color:#444">➔</span>' : ''}
+                    \`).join('')}
                 </div>
             </div>
 
             <div class="modal-actions" style="margin-top:20px">
-                <button class="action-btn" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
-                <button class="action-btn" onclick="toggleFavorite(${p.id})">⭐ FAVORITAR</button>
+                <button class="action-btn" onclick="toggleShiny('\${p.image}', '\${p.shiny}')">✨ VER SHINY</button>
+                <button class="action-btn" onclick="toggleFavorite(\${p.id})">⭐ FAVORITAR</button>
             </div>
         `;
     } catch (e) { content.innerHTML = "Erro ao carregar."; }
@@ -194,12 +194,12 @@ function updateFavoritesGrid() {
     const grid = document.getElementById('favoritesGrid');
     if (!grid) return;
     if (!favs.length) { grid.innerHTML = '<p style="grid-column:1/-1; color:#888;">Sem favoritos.</p>'; return; }
-    grid.innerHTML = allPokemon.filter(p => favs.includes(p.id)).map(p => `
-        <div class="pokemon-card" onclick="showDetail(${p.id})">
-            <div class="pokemon-image"><img src="${p.image}"></div>
-            <div class="pokemon-name">${p.name.toUpperCase()}</div>
+    grid.innerHTML = allPokemon.filter(p => favs.includes(p.id)).map(p => \`
+        <div class="pokemon-card" onclick="showDetail(\${p.id})">
+            <div class="pokemon-image"><img src="\${p.image}"></div>
+            <div class="pokemon-name">\${p.name.toUpperCase()}</div>
         </div>
-    `).join('');
+    \`).join('');
 }
 
 function openCompareSelector(slot) { activeSlot = slot; document.getElementById('compareSelectorModal').classList.add('show'); showRegions(); }
@@ -210,27 +210,27 @@ function showRegions() {
     document.getElementById('pokemonSelector').style.display = 'none';
     const reg = document.getElementById('regionSelector');
     reg.style.display = 'grid';
-    reg.innerHTML = Object.keys(generationRanges).map(gen => `
-        <button class="selector-btn" onclick="showPokemonByRegion(${gen})">${generationRanges[gen].name.toUpperCase()}  
-<small>Geração ${gen}</small></button>
-    `).join('');
+    reg.innerHTML = Object.keys(generationRanges).map(gen => \`
+        <button class="selector-btn" onclick="showPokemonByRegion(\${gen})">\${generationRanges[gen].name.toUpperCase()}  
+<small>Geração \${gen}</small></button>
+    \`).join('');
 }
 
 function showPokemonByRegion(gen) {
-    document.getElementById('selectorTitle').innerText = `REGIÃO ${generationRanges[gen].name.toUpperCase()}`;
+    document.getElementById('selectorTitle').innerText = \`REGIÃO \${generationRanges[gen].name.toUpperCase()}\`;
     document.getElementById('regionSelector').style.display = 'none';
     const pSel = document.getElementById('pokemonSelector');
     pSel.style.display = 'grid';
     const pokes = allPokemon.filter(p => p.id >= generationRanges[gen].start && p.id <= generationRanges[gen].end);
-    pSel.innerHTML = `<button class="selector-btn" style="grid-column:1/-1" onclick="showRegions()">⬅ VOLTAR</button>` + 
-        pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}"><div style="font-size:0.7em">${p.name.toUpperCase()}</div></div>`).join('');
+    pSel.innerHTML = \`<button class="selector-btn" style="grid-column:1/-1" onclick="showRegions()">⬅ VOLTAR</button>\` + 
+        pokes.map(p => \`<div class="mini-poke-btn" onclick="selectForCompare(\${p.id})"><img src="\${p.image}"><div style="font-size:0.7em">\${p.name.toUpperCase()}</div></div>\`).join('');
 }
 
 async function selectForCompare(id) {
     let p = allPokemon.find(poke => poke.id === id);
-    if (!p.stats.length) { const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json()); p.stats = d.stats; }
+    if (!p.stats.length) { const d = await fetch(\`\${POKE_API}/pokemon/\${id}\`).then(res => res.json()); p.stats = d.stats; }
     compareSlots[activeSlot] = p;
-    document.getElementById(`result${activeSlot}`).innerHTML = `<img src="${p.image}" style="width:120px"><div class="pokemon-name">${p.name.toUpperCase()}</div>`;
+    document.getElementById(\`result\${activeSlot}\`).innerHTML = \`<img src="\${p.image}" style="width:120px"><div class="pokemon-name">\${p.name.toUpperCase()}</div>\`;
     closeCompareSelector(); updateComparison();
 }
 
@@ -240,8 +240,8 @@ function updateComparison() {
     const statNames = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
     document.getElementById('comparison-stats').innerHTML = statNames.map((name, i) => {
         const v1 = s1[i].base_stat, v2 = s2[i].base_stat;
-        return `<div class="stat-row"><div class="stat-val ${v1>v2?'winner':''}">${v1}</div><div class="stat-label">${statTranslations[name]}</div><div class="stat-val ${v2>v1?'winner':''}">${v2}</div></div>`;
-    }).join('') + `<button class="action-btn" style="width:100%; margin-top:20px" onclick="battleResult()">⚔️ QUEM VENCE?</button>`;
+        return \`<div class="stat-row"><div class="stat-val \${v1>v2?'winner':''}">\${v1}</div><div class="stat-label">\${statTranslations[name]}</div><div class="stat-val \${v2>v1?'winner':''}">\${v2}</div></div>\`;
+    }).join('') + \`<button class="action-btn" style="width:100%; margin-top:20px" onclick="battleResult()">⚔️ QUEM VENCE?</button>\`;
 }
 
 function battleResult() {
@@ -250,16 +250,24 @@ function battleResult() {
     const total1 = p1.stats.reduce((acc, s) => acc + s.base_stat, 0);
     const total2 = p2.stats.reduce((acc, s) => acc + s.base_stat, 0);
     const winner = total1 > total2 ? p1.name : p2.name;
-    alert(`O CAMPEÃO É: ${winner.toUpperCase()}! 🏆`);
+    alert(\`O CAMPEÃO É: \${winner.toUpperCase()}! 🏆\`);
 }
 
 async function loadItems() {
     const grid = document.getElementById('itemGrid'); if (!grid) return;
     grid.innerHTML = '<div class="loading">Carregando...</div>';
     try {
-        const data = await fetch(`${POKE_API}/item?limit=30`).then(res => res.json());
+        const response = await fetch(\`\${POKE_API}/item?limit=60\`);
+        const data = await response.json();
         const items = await Promise.all(data.results.map(i => fetch(i.url).then(r => r.json())));
-        grid.innerHTML = items.map(i => `<div class="pokemon-card" onclick="showItemDetail('${i.name}')"><img src="${i.sprites.default||''}" style="width:50px"><div>${getTranslatedItemName(i.name)}</div></div>`).join('');
+        const filteredItems = items.filter(i => i.category.name !== 'standard-balls' && i.category.name !== 'special-balls');
+
+        grid.innerHTML = filteredItems.map(i => \`
+            <div class="pokemon-card" onclick="showItemDetail('\${i.name}')">
+                <img src="\${i.sprites.default||''}" style="width:50px">
+                <div style="font-size:0.7em">\${getTranslatedItemName(i.name)}</div>
+            </div>
+        \`).join('');
     } catch(e) { grid.innerHTML = "Erro."; }
 }
 
@@ -267,9 +275,14 @@ async function loadPokeballs() {
     const grid = document.getElementById('pokeballGrid'); if (!grid) return;
     grid.innerHTML = '<div class="loading">Carregando...</div>';
     try {
-        const data = await fetch(`${POKE_API}/item-category/34/`).then(res => res.json());
+        const data = await fetch(\`\${POKE_API}/item-category/34/\`).then(res => res.json());
         const balls = await Promise.all(data.items.map(i => fetch(i.url).then(r => r.json())));
-        grid.innerHTML = balls.map(b => `<div class="pokemon-card" onclick="showItemDetail('${b.name}')"><img src="${b.sprites.default}" style="width:50px"><div>${getTranslatedItemName(b.name)}</div></div>`).join('');
+        grid.innerHTML = balls.map(b => \`
+            <div class="pokemon-card" onclick="showItemDetail('\${b.name}')">
+                <img src="\${b.sprites.default}" style="width:50px">
+                <div style="font-size:0.7em">\${getTranslatedItemName(b.name)}</div>
+            </div>
+        \`).join('');
     } catch(e) { grid.innerHTML = "Erro."; }
 }
 
@@ -279,13 +292,17 @@ async function showItemDetail(itemName) {
     modal.classList.add('show');
     content.innerHTML = '<div class="loading">Buscando...</div>';
     try {
-        const item = await fetch(`${POKE_API}/item/${itemName}`).then(r => r.json());
+        const item = await fetch(\`\${POKE_API}/item/\${itemName}\`).then(r => r.json());
         const desc = item.flavor_text_entries.find(e => e.language.name === 'en')?.text || "Sem descrição.";
-        content.innerHTML = `
-            <img src="${item.sprites.default || ''}" style="width:100px">
-            <h2 class="pokemon-name">${getTranslatedItemName(item.name)}</h2>
-            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">${desc}</div>
+        content.innerHTML = \`
+            <img src="\${item.sprites.default || ''}" style="width:100px">
+            <h2 class="pokemon-name">\${getTranslatedItemName(item.name)}</h2>
+            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">\${desc}</div>
             <button class="action-btn" onclick="closeModal()">FECHAR</button>
-        `;
+        \`;
     } catch (e) { content.innerHTML = "Erro."; }
 }
+
+// Função auxiliar de tradução de itens (se não estiver no translations.js)
+const itemNamesPT = { "potion": "Poção", "super-potion": "Super Poção", "hyper-potion": "Hiper Poção", "max-potion": "Poção Máxima", "revive": "Reviver", "rare-candy": "Doce Raro", "sun-stone": "Pedra do Sol", "moon-stone": "Pedra da Lua", "fire-stone": "Pedra de Fogo", "thunder-stone": "Pedra do Trovão", "water-stone": "Pedra da Água", "poke-ball": "Poké Bola", "great-ball": "Grande Bola", "ultra-ball": "Ultra Bola", "master-ball": "Master Ball" };
+function getTranslatedItemName(name) { return itemNamesPT[name] || name.toUpperCase().replace(/-/g, ' '); }
