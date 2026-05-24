@@ -99,9 +99,52 @@ async function showDetail(id) {
     const modal = document.getElementById('detailModal');
     modal.classList.add('show');
     const content = document.getElementById('detailContent');
-    content.innerHTML = '<div class="loading">Carregando...</div>';
-    const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
-    content.innerHTML = `<img src="${p.image}" style="width:180px"><h2>${p.name.toUpperCase()}</h2><div class="types-container">${d.types.map(t => `<span class="type-badge ${t.type.name}">${typeTranslations[t.type.name] || t.type.name}</span>`).join('')}</div><div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; font-size:0.8em;">${d.stats.map(s => `<div><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</div>`).join('')}</div>`;
+    content.innerHTML = '<div class="loading">Carregando detalhes e evoluções...</div>';
+    
+    try {
+        const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
+        const species = await fetch(d.species.url).then(res => res.json());
+        const evoData = await fetch(species.evolution_chain.url).then(res => res.json());
+        
+        let evoChain = [];
+        let evoCurrent = evoData.chain;
+        
+        // Lógica para percorrer a árvore de evolução
+        while (evoCurrent) {
+            const evoId = evoCurrent.species.url.split('/').filter(Boolean).pop();
+            evoChain.push({
+                name: evoCurrent.species.name,
+                id: evoId,
+                image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${evoId}.png`
+            } );
+            evoCurrent = evoCurrent.evolves_to[0];
+        }
+
+        content.innerHTML = `
+            <img src="${p.image}" style="width:180px">
+            <h2>${p.name.toUpperCase()}</h2>
+            <div class="types-container">${d.types.map(t => `<span class="type-badge ${t.type.name}">${typeTranslations[t.type.name] || t.type.name}</span>`).join('')}</div>
+            
+            <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; font-size:0.8em;">
+                ${d.stats.map(s => `<div><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</div>`).join('')}
+            </div>
+
+            <div class="evolution-chain" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+                <h3 style="font-family:Orbitron; font-size:0.9em; margin-bottom:15px;">LINHA EVOLUTIVA</h3>
+                <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
+                    ${evoChain.map((evo, index) => `
+                        <div style="text-align:center; cursor:pointer" onclick="showDetail(${evo.id})">
+                            <img src="${evo.image}" style="width:60px; border-radius:50%; background:rgba(255,255,255,0.05); padding:5px; border:1px solid rgba(241,196,15,0.2);">
+                            <div style="font-size:9px; margin-top:5px; color:#f1c40f">${evo.name.toUpperCase()}</div>
+                        </div>
+                        ${index < evoChain.length - 1 ? '<span style="color:#f1c40f; font-weight:bold">➔</span>' : ''}
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } catch(e) {
+        content.innerHTML = `<h2>Erro ao carregar detalhes</h2>`;
+    }
 }
 
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
