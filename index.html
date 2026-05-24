@@ -8,16 +8,20 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="dev-banner">
+    <!-- Som de Vitória (Oculto) -->
+    <audio id="victorySound" src="https://www.myinstants.com/media/sounds/pokemon-victory-sound.mp3"></audio>
+
+    <div class="dev-banner glow-effect">
         <div class="dev-banner-content">
             <span class="dev-badge">PROJETO DE APRENDIZADO</span>
-            <span class="dev-banner-text">Pokémon Guide — Versão Final e Corrigida! 🚀</span>
+            <span class="dev-banner-text">Pokémon Guide — Construindo o futuro da programação! 🚀</span>
         </div>
     </div>
 
     <div class="container">
         <header class="header">
             <div class="logo-container" onclick="switchTab('pokemon')" style="cursor:pointer">
+                <div class="spinning-pokeball"></div>
                 <h1 class="logo">POKÉMON <span>GUIDE</span></h1>
             </div>
             <nav class="main-nav">
@@ -85,6 +89,15 @@
                 <div id="favoritesGrid" class="pokemon-grid"></div>
             </section>
         </main>
+
+        <footer class="dev-footer glow-effect">
+            <div class="dev-footer-content">
+                <div class="dev-footer-title">🎮 PROJETO DE APRENDIZADO</div>
+                <p class="dev-footer-text">
+                    Desenvolvido com HTML, CSS e JavaScript, consumindo a PokéAPI.
+                </p>
+            </div>
+        </footer>
     </div>
 
     <!-- MODAIS -->
