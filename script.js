@@ -16,7 +16,7 @@ const generationRanges = {
 };
 
 const translations = {
-    types: { 'normal': 'Normal', 'fire': 'Fogo', 'water': 'Água', 'grass': 'Planta', 'electric': 'Elétrico', 'ice': 'Gelo', 'fighting': 'Lutador', 'poison': 'Venenoso', 'ground': 'Terra', 'flying': 'Voador', 'psychic': 'Psíquico', 'bug': 'Inseto', 'rock': 'Pedra', 'ghost': 'Fantasma', 'dragon': 'Dragão', 'dark': 'Sombrio', 'steel': 'Aço', 'fairy': 'Fada' },
+    types: { 'normal': 'Nor', 'fire': 'Fog', 'water': 'Águ', 'grass': 'Pla', 'electric': 'Elé', 'ice': 'Gel', 'fighting': 'Lut', 'poison': 'Ven', 'ground': 'Ter', 'flying': 'Voa', 'psychic': 'Psi', 'bug': 'Ins', 'rock': 'Ped', 'ghost': 'Fan', 'dragon': 'Dra', 'dark': 'Som', 'steel': 'Aço', 'fairy': 'Fad' },
     stats: { 'hp': 'Vida', 'attack': 'Ataque', 'defense': 'Defesa', 'speed': 'Velocidade' },
     items: {
         'poke-ball': { name: 'Poké Bola', desc: 'Item básico para capturar Pokémons selvagens.' },
@@ -26,7 +26,8 @@ const translations = {
         'potion': { name: 'Poção', desc: 'Restaura 20 pontos de vida (HP) de um Pokémon.' },
         'super-potion': { name: 'Super Poção', desc: 'Restaura 60 pontos de vida (HP) de um Pokémon.' },
         'rare-candy': { name: 'Doce Raro', desc: 'Aumenta o nível de um Pokémon em 1.' },
-        'revive': { name: 'Reviver', desc: 'Revive um Pokémon desmaiado com metade do seu HP.' }
+        'revive': { name: 'Reviver', desc: 'Revive um Pokémon desmaiado com metade do seu HP.' },
+        'antidote': { name: 'Antídoto', desc: 'Cura um Pokémon que foi envenenado.' }
     }
 };
 
@@ -55,8 +56,6 @@ function switchTab(tab) {
     document.getElementById(`${tab}-tab`)?.classList.add('active');
     document.getElementById(`btn-${tab}`)?.classList.add('active');
     if (tab === 'favorites') updateFavoritesGrid();
-    if (tab === 'items') loadItems();
-    if (tab === 'pokeballs') loadPokeballs();
 }
 
 function filterPokemon() {
@@ -103,11 +102,13 @@ async function showDetail(id) {
         const allEvos = getEvolutions(evoData.chain);
 
         content.innerHTML = `
-            <img id="modal-img" src="${p.image}" style="width:140px">
-            <h2 style="font-family:Orbitron">${p.name.toUpperCase()}</h2>
-            <div style="margin:10px 0">${d.types.map(t => `<span class="type-badge ${t.type.name}">${translations.types[t.type.name] || t.type.name}</span>`).join('')}</div>
+            <img id="modal-img" src="${p.image}" style="width:160px">
+            <h2 style="font-family:Orbitron; margin-bottom:10px">${p.name.toUpperCase()}</h2>
+            <div class="type-container">
+                ${d.types.map(t => `<div class="type-badge ${t.type.name}">${translations.types[t.type.name] || t.type.name}</div>`).join('')}
+            </div>
             <button class="shiny-toggle-btn" onclick="toggleShiny(${id})">VER SHINY ✨</button>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px; font-size:0.8em; text-align:left;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:20px; font-size:0.85em; text-align:left;">
                 ${d.stats.filter(s => translations.stats[s.stat.name]).map(s => `<div><strong>${translations.stats[s.stat.name]}:</strong> ${s.base_stat}</div>`).join('')}
             </div>
             <div class="evolution-chain">
@@ -141,113 +142,7 @@ function toggleFavorite(event, id) {
     }
     localStorage.setItem('pokeFavorites', JSON.stringify(favs));
     filterPokemon();
-    updateFavoritesGrid();
-}
-
-async function loadItems() {
-    const grid = document.getElementById('itemGrid');
-    grid.innerHTML = '<div class="loading">Carregando...</div>';
-    const r = await fetch(`${POKE_API}/item?limit=100`);
-    const d = await r.json();
-    const items = await Promise.all(d.results.map(i => fetch(i.url).then(res => res.json())));
-    grid.innerHTML = items.filter(i => !i.name.includes('ball')).slice(0, 30).map(i => {
-        const tr = translations.items[i.name] || { name: i.name.replace(/-/g, ' '), desc: 'Item útil para sua jornada.' };
-        return `<div class="pokemon-card item-card" onclick="showItemDetail('${tr.name}', '${i.sprites.default}', '${tr.desc}')">
-            <img src="${i.sprites.default}">
-            <div>${tr.name.toUpperCase()}</div>
-            <div style="font-size:0.7em; color:#888">Ver mais</div>
-        </div>`;
-    }).join('');
-}
-
-async function loadPokeballs() {
-    const grid = document.getElementById('pokeballGrid');
-    grid.innerHTML = '<div class="loading">Carregando...</div>';
-    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'luxury-ball', 'premier-ball', 'quick-ball'];
-    const data = await Promise.all(balls.map(b => fetch(`${POKE_API}/item/${b}`).then(r => r.json())));
-    grid.innerHTML = data.map(b => {
-        const tr = translations.items[b.name] || { name: b.name.replace(/-/g, ' '), desc: 'Pokébola para capturar Pokémons.' };
-        return `<div class="pokemon-card item-card" onclick="showItemDetail('${tr.name}', '${b.sprites.default}', '${tr.desc}')">
-            <img src="${b.sprites.default}">
-            <div>${tr.name.toUpperCase()}</div>
-            <div style="font-size:0.7em; color:#888">Ver mais</div>
-        </div>`;
-    }).join('');
-}
-
-function showItemDetail(name, img, desc) {
-    const modal = document.getElementById('detailModal');
-    modal.classList.add('show');
-    document.getElementById('detailContent').innerHTML = `
-        <img src="${img}" style="width:100px">
-        <h2 style="font-family:Orbitron; margin:15px 0">${name.toUpperCase()}</h2>
-        <p style="color:#ccc; font-style:italic">${desc}</p>
-    `;
-}
-
-function openCompareSelector(slot) {
-    activeSlot = slot;
-    document.getElementById('selectorModal').classList.add('show');
-    let html = '';
-    Object.keys(generationRanges).forEach(g => html += `<button class="selector-btn" onclick="showPokeSelector(${g})">${generationRanges[g].name}</button>`);
-    document.getElementById('regionList').innerHTML = html;
-    document.getElementById('regionList').style.display = 'grid';
-    document.getElementById('pokeSelectorList').style.display = 'none';
-}
-
-function showPokeSelector(gen) {
-    const range = generationRanges[gen];
-    const pokes = allPokemon.filter(p => p.id >= range.start && p.id <= range.end);
-    let html = `<button class="selector-btn" style="grid-column:1/-1" onclick="openCompareSelector(${activeSlot})">⬅ VOLTAR</button>`;
-    html += pokes.map(p => `<div class="mini-poke-card" onclick="selectForCompare(${p.id})"><img src="${p.image}"><div>${p.name.toUpperCase()}</div></div>`).join('');
-    document.getElementById('pokeSelectorList').innerHTML = html;
-    document.getElementById('regionList').style.display = 'none';
-    document.getElementById('pokeSelectorList').style.display = 'grid';
-}
-
-async function selectForCompare(id) {
-    const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
-    compareSlots[activeSlot] = { name: d.name, image: d.sprites.other['official-artwork'].front_default, stats: d.stats };
-    document.getElementById(`result${activeSlot}`).innerHTML = `<img src="${compareSlots[activeSlot].image}" style="width:100px"><div style="font-family:Orbitron;font-size:0.8em">${d.name.toUpperCase()}</div>`;
-    closeSelector();
-    updateComparison();
-}
-
-function updateComparison() {
-    if (!compareSlots[1] || !compareSlots[2]) return;
-    const statsToCompare = ['hp', 'attack', 'defense', 'speed'];
-    let html = '';
-    statsToCompare.forEach(sName => {
-        const v1 = compareSlots[1].stats.find(s => s.stat.name === sName).base_stat;
-        const v2 = compareSlots[2].stats.find(s => s.stat.name === sName).base_stat;
-        const max = Math.max(v1, v2, 1);
-        html += `
-            <div class="stat-comparison-row">
-                <div class="stat-num ${v1 >= v2 ? 'winner' : ''}">${v1}</div>
-                <div class="stat-label" style="font-size:0.6em">${translations.stats[sName].toUpperCase()}</div>
-                <div class="stat-num ${v2 >= v1 ? 'winner' : ''}">${v2}</div>
-            </div>
-            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(v1/max)*100}%"></div></div>
-        `;
-    });
-    html += `<button class="action-btn" style="width:100%;margin-top:20px" onclick="startBattle()">INICIAR LUTA ⚔️</button>`;
-    document.getElementById('comparison-details').innerHTML = html;
-}
-
-function startBattle() {
-    const s1 = compareSlots[1].stats.reduce((a, s) => a + s.base_stat, 0);
-    const s2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
-    const winner = s1 >= s2 ? compareSlots[1] : compareSlots[2];
-    
-    document.getElementById('victoryImg').src = winner.image;
-    document.getElementById('victoryName').innerText = winner.name.toUpperCase();
-    document.getElementById('victoryReason').innerText = `Venceu com ${Math.max(s1,s2)} de Poder Total!`;
-    
-    // Tocar Som de Vitória
-    const audio = document.getElementById('victorySound');
-    if(audio) audio.play().catch(e => console.log("Erro ao tocar som:", e));
-    
-    document.getElementById('victoryModal').classList.add('show');
+    if (document.getElementById('favorites-tab').classList.contains('active')) updateFavoritesGrid();
 }
 
 function updateFavoritesGrid() {
@@ -263,7 +158,46 @@ function updateFavoritesGrid() {
     `).join('');
 }
 
-function closeSelector() { document.getElementById('selectorModal').classList.remove('show'); }
+async function loadItems() {
+    const grid = document.getElementById('itemGrid');
+    grid.innerHTML = '<div class="loading">Carregando...</div>';
+    const r = await fetch(`${POKE_API}/item?limit=100`);
+    const d = await r.json();
+    const items = await Promise.all(d.results.map(i => fetch(i.url).then(res => res.json())));
+    grid.innerHTML = items.filter(i => !i.name.includes('ball')).slice(0, 30).map(i => {
+        const tr = translations.items[i.name] || { name: i.name.replace(/-/g, ' '), desc: 'Item útil para sua jornada.' };
+        return `<div class="pokemon-card" onclick="showItemDetail('${tr.name}', '${i.sprites.default}', '${tr.desc}')">
+            <img src="${i.sprites.default}" style="width:50px">
+            <div class="pokemon-name">${tr.name.toUpperCase()}</div>
+        </div>`;
+    }).join('');
+}
+
+async function loadPokeballs() {
+    const grid = document.getElementById('pokeballGrid');
+    grid.innerHTML = '<div class="loading">Carregando...</div>';
+    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'luxury-ball', 'premier-ball', 'quick-ball'];
+    const data = await Promise.all(balls.map(b => fetch(`${POKE_API}/item/${b}`).then(r => r.json())));
+    grid.innerHTML = data.map(b => {
+        const tr = translations.items[b.name] || { name: b.name.replace(/-/g, ' '), desc: 'Pokébola para capturar Pokémons.' };
+        return `<div class="pokemon-card" onclick="showItemDetail('${tr.name}', '${b.sprites.default}', '${tr.desc}')">
+            <img src="${b.sprites.default}" style="width:50px">
+            <div class="pokemon-name">${tr.name.toUpperCase()}</div>
+        </div>`;
+    }).join('');
+}
+
+function showItemDetail(name, img, desc) {
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('show');
+    document.getElementById('detailContent').innerHTML = `
+        <img src="${img}" class="item-detail-img">
+        <h2 class="item-detail-name">${name.toUpperCase()}</h2>
+        <p class="item-detail-desc">${desc}</p>
+    `;
+}
+
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
+function closeSelector() { document.getElementById('selectorModal').classList.remove('show'); }
 function closeVictoryModal() { document.getElementById('victoryModal').classList.remove('show'); }
 function randomPokemon() { showDetail(Math.floor(Math.random() * 1025) + 1); }
