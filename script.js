@@ -37,7 +37,6 @@ function switchTab(tab) {
     const btn = document.getElementById(`btn-${tab}`);
     if (btn) btn.classList.add('active');
 
-    // Resetar filtros ao voltar para a aba pokemon
     if (tab === 'pokemon') {
         document.getElementById('searchInput').value = '';
         document.getElementById('generationFilter').value = '';
@@ -98,21 +97,63 @@ async function showDetail(id) {
     const p = allPokemon.find(poke => poke.id === id);
     const modal = document.getElementById('detailModal');
     const content = document.getElementById('detailContent');
-    content.innerHTML = '<div class="loading">Sincronizando...</div>';
+    content.innerHTML = '<div class="loading">Sincronizando Dados...</div>';
     modal.classList.add('show');
     try {
         const species = await fetch(`${POKE_API}/pokemon-species/${id}`).then(r => r.json());
         let desc = species.flavor_text_entries.find(e => e.language.name === 'pt' || e.language.name === 'en')?.flavor_text || "";
-        if (!p.types.length) {
-            const data = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
-            p.types = data.types.map(t => t.type.name); p.stats = data.stats;
+        
+        // Buscar Evoluções
+        const evoData = await fetch(species.evolution_chain.url).then(r => r.json());
+        const evolutions = [];
+        let curr = evoData.chain;
+        while(curr) {
+            const id = curr.species.url.split('/').filter(Boolean).pop();
+            evolutions.push({ id, name: curr.species.name });
+            curr = curr.evolves_to[0];
         }
+
+        // Buscar Fraquezas (baseado no primeiro tipo)
+        const typeData = await fetch(`${POKE_API}/type/${p.types[0] || 'normal'}`).then(r => r.json());
+        const weaknesses = typeData.damage_relations.double_damage_from.map(t => t.name);
+        const strengths = typeData.damage_relations.double_damage_to.map(t => t.name);
+
         content.innerHTML = `
             <img id="modal-img" src="${p.image}" style="width:180px">
             <h2 class="pokemon-name">${p.name.toUpperCase()}</h2>
             <div class="types-container">${p.types.map(t => `<span class="type-badge ${t}">${t.toUpperCase()}</span>`).join('')}</div>
-            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">${typeof translateDescription === 'function' ? translateDescription(desc) : desc.replace(/\f/g, ' ')}</div>
-            <div class="modal-actions">
+            
+            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">
+                ${typeof translateDescription === 'function' ? translateDescription(desc) : desc.replace(/\\f/g, ' ')}
+            </div>
+
+            <div class="battle-info" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0; font-size:0.8em;">
+                <div style="background:#222; padding:10px; border-radius:8px;">
+                    <strong style="color:#ff4422">FRAQUEZAS</strong>  
+
+                    ${weaknesses.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${t.toUpperCase()}</span>`).join(' ')}
+                </div>
+                <div style="background:#222; padding:10px; border-radius:8px;">
+                    <strong style="color:#77cc55">VANTAGENS</strong>  
+
+                    ${strengths.map(t => `<span class="type-badge ${t}" style="padding:2px 5px; font-size:0.7em">${t.toUpperCase()}</span>`).join(' ')}
+                </div>
+            </div>
+
+            <div class="evolution-chain" style="margin-top:20px;">
+                <strong style="font-size:0.8em; color:var(--accent-gold)">LINHA EVOLUTIVA</strong>
+                <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:10px;">
+                    ${evolutions.map((evo, i) => `
+                        <div style="text-align:center">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${evo.id}.png" style="width:50px; cursor:pointer" onclick="showDetail(${evo.id} )">
+                            <div style="font-size:0.6em">${evo.name.toUpperCase()}</div>
+                        </div>
+                        ${i < evolutions.length - 1 ? '<span style="color:#444">➔</span>' : ''}
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top:20px">
                 <button class="action-btn" onclick="toggleShiny('${p.image}', '${p.shiny}')">✨ VER SHINY</button>
                 <button class="action-btn" onclick="toggleFavorite(${p.id})">⭐ FAVORITAR</button>
             </div>
@@ -188,8 +229,17 @@ function updateComparison() {
     const statNames = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
     document.getElementById('comparison-stats').innerHTML = statNames.map((name, i) => {
         const v1 = s1[i].base_stat, v2 = s2[i].base_stat;
-        return `<div class="stat-row"><div class="stat-val ${v1>v2?'winner':''}">${v1}</div><div class="stat-label">${statTranslations[name]}</div><div class="stat-val ${v2>v1?'winner':''}">${v2}</div></div>`;
-    }).join('');
+        return `<div class="stat-row"><div class="stat-val \${v1>v2?'winner':''}">${v1}</div><div class="stat-label">\${statTranslations[name]}</div><div class="stat-val \${v2>v1?'winner':''}">${v2}</div></div>`;
+    }).join('') + `<button class="action-btn" style="width:100%; margin-top:20px" onclick="battleResult()">⚔️ QUEM VENCE?</button>`;
+}
+
+function battleResult() {
+    const p1 = compareSlots[1];
+    const p2 = compareSlots[2];
+    const total1 = p1.stats.reduce((acc, s) => acc + s.base_stat, 0);
+    const total2 = p2.stats.reduce((acc, s) => acc + s.base_stat, 0);
+    const winner = total1 > total2 ? p1.name : p2.name;
+    alert(`O CAMPEÃO É: \${winner.toUpperCase()}! 🏆`);
 }
 
 // --- ITENS E POKÉBOLAS ---
@@ -199,7 +249,7 @@ async function loadItems() {
     try {
         const data = await fetch(`${POKE_API}/item?limit=30`).then(res => res.json());
         const items = await Promise.all(data.results.map(i => fetch(i.url).then(r => r.json())));
-        grid.innerHTML = items.map(i => `<div class="pokemon-card" onclick="showItemDetail('${i.name}')"><img src="${i.sprites.default||''}" style="width:50px"><div>${getTranslatedItemName(i.name)}</div></div>`).join('');
+        grid.innerHTML = items.map(i => `<div class="pokemon-card" onclick="showItemDetail('\${i.name}')"><img src="\${i.sprites.default||''}" style="width:50px"><div>\${getTranslatedItemName(i.name)}</div></div>`).join('');
     } catch(e) { grid.innerHTML = "Erro."; }
 }
 
@@ -209,7 +259,7 @@ async function loadPokeballs() {
     try {
         const data = await fetch(`${POKE_API}/item-category/34/`).then(res => res.json());
         const balls = await Promise.all(data.items.map(i => fetch(i.url).then(r => r.json())));
-        grid.innerHTML = balls.map(b => `<div class="pokemon-card" onclick="showItemDetail('${b.name}')"><img src="${b.sprites.default}" style="width:50px"><div>${getTranslatedItemName(b.name)}</div></div>`).join('');
+        grid.innerHTML = balls.map(b => `<div class="pokemon-card" onclick="showItemDetail('\${b.name}')"><img src="\${b.sprites.default}" style="width:50px"><div>\${getTranslatedItemName(b.name)}</div></div>`).join('');
     } catch(e) { grid.innerHTML = "Erro."; }
 }
 
@@ -219,12 +269,12 @@ async function showItemDetail(itemName) {
     modal.classList.add('show');
     content.innerHTML = '<div class="loading">Buscando...</div>';
     try {
-        const item = await fetch(`${POKE_API}/item/${itemName}`).then(r => r.json());
+        const item = await fetch(`${POKE_API}/item/\${itemName}`).then(r => r.json());
         const desc = item.flavor_text_entries.find(e => e.language.name === 'en')?.text || "Sem descrição.";
         content.innerHTML = `
-            <img src="${item.sprites.default || ''}" style="width:100px">
-            <h2 class="pokemon-name">${getTranslatedItemName(item.name)}</h2>
-            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">${desc}</div>
+            <img src="\${item.sprites.default || ''}" style="width:100px">
+            <h2 class="pokemon-name">\${getTranslatedItemName(item.name)}</h2>
+            <div class="detail-description" style="color:#eee; font-size:0.9em; margin:15px 0; line-height:1.6; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">\${desc}</div>
             <button class="action-btn" onclick="closeModal()">FECHAR</button>
         `;
     } catch (e) { content.innerHTML = "Erro."; }
