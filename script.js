@@ -3,6 +3,18 @@ let allPokemon = [];
 let compareSlots = { 1: null, 2: null };
 let activeSlot = 1;
 
+const generationRanges = {
+    1: { start: 1, end: 151, name: "Kanto" },
+    2: { start: 152, end: 251, name: "Johto" },
+    3: { start: 252, end: 386, name: "Hoenn" },
+    4: { start: 387, end: 493, name: "Sinnoh" },
+    5: { start: 494, end: 649, name: "Unova" },
+    6: { start: 650, end: 721, name: "Kalos" },
+    7: { start: 722, end: 809, name: "Alola" },
+    8: { start: 810, end: 905, name: "Galar" },
+    9: { start: 906, end: 1025, name: "Paldea" }
+};
+
 const typeTranslations = {
     'normal': 'Normal', 'fire': 'Fogo', 'water': 'Água', 'grass': 'Planta',
     'electric': 'Elétrico', 'ice': 'Gelo', 'fighting': 'Lutador', 'poison': 'Venenoso',
@@ -12,14 +24,22 @@ const typeTranslations = {
 };
 
 const itemDataBR = {
-    'poke-ball': { name: 'Poké Bola', desc: 'Ferramenta básica de captura.' },
+    'poke-ball': { name: 'Poké Bola', desc: 'Ferramenta básica para capturar Pokémons.' },
     'great-ball': { name: 'Grande Bola', desc: 'Melhor taxa de captura que a Poké Bola.' },
-    'ultra-ball': { name: 'Ultra Bola', desc: 'Uma bola ultra-eficiente.' },
-    'master-ball': { name: 'Bola Mestra', desc: 'Captura infalível.' },
-    'potion': { name: 'Poção', desc: 'Restaura 20 HP.' },
-    'super-potion': { name: 'Super Poção', desc: 'Restaura 60 HP.' },
-    'rare-candy': { name: 'Doce Raro', desc: 'Aumenta o nível em 1.' },
-    'revive': { name: 'Reviver', desc: 'Revive com metade do HP.' }
+    'ultra-ball': { name: 'Ultra Bola', desc: 'Uma bola ultra-eficiente para capturar Pokémons.' },
+    'master-ball': { name: 'Bola Mestra', desc: 'A melhor bola. Captura qualquer Pokémon sem falhar.' },
+    'safari-ball': { name: 'Bola Safari', desc: 'Bola especial usada na Zona Safari.' },
+    'net-ball': { name: 'Bola de Rede', desc: 'Eficaz contra tipos Água e Inseto.' },
+    'dive-ball': { name: 'Bola de Mergulho', desc: 'Funciona melhor debaixo d\'água.' },
+    'dusk-ball': { name: 'Bola do Crepúsculo', desc: 'Eficaz à noite ou em cavernas.' },
+    'quick-ball': { name: 'Bola Rápida', desc: 'Melhor se usada no início da batalha.' },
+    'potion': { name: 'Poção', desc: 'Restaura 20 HP de um Pokémon.' },
+    'super-potion': { name: 'Super Poção', desc: 'Restaura 60 HP de um Pokémon.' },
+    'hyper-potion': { name: 'Hiper Poção', desc: 'Restaura 120 HP de um Pokémon.' },
+    'max-potion': { name: 'Poção Máxima', desc: 'Restaura totalmente o HP.' },
+    'rare-candy': { name: 'Doce Raro', desc: 'Aumenta o nível de um Pokémon em 1.' },
+    'revive': { name: 'Reviver', desc: 'Revive com metade do HP.' },
+    'full-restore': { name: 'Restauração Total', desc: 'Cura tudo e restaura HP total.' }
 };
 
 document.addEventListener('DOMContentLoaded', ( ) => { loadPokemon(); setupEvents(); });
@@ -40,81 +60,110 @@ function switchTab(tab) {
 }
 
 async function loadPokemon() {
-    const r = await fetch(POKE_API + '/pokemon?limit=151');
-    const d = await r.json();
-    allPokemon = d.results.map((p, i) => ({
-        id: i + 1, name: p.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`,
+    const response = await fetch(POKE_API + '/pokemon?limit=1025');
+    const data = await response.json();
+    allPokemon = data.results.map((p, index) => ({
+        id: index + 1, name: p.name,
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
         types: [], stats: []
     } ));
     filterPokemon();
 }
 
+function getFavorites() { return JSON.parse(localStorage.getItem('pokeFavorites') || '[]'); }
+
+function toggleFavorite(event, id) {
+    event.stopPropagation();
+    let favs = getFavorites();
+    if (favs.includes(id)) favs = favs.filter(f => f !== id);
+    else favs.push(id);
+    localStorage.setItem('pokeFavorites', JSON.stringify(favs));
+    filterPokemon();
+    updateFavoritesGrid();
+}
+
 function filterPokemon() {
     const term = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allPokemon.filter(p => p.name.includes(term));
+    const gen = document.getElementById('generationFilter').value;
+    const favs = getFavorites();
+    const filtered = allPokemon.filter(p => {
+        const mSearch = p.name.includes(term) || String(p.id).includes(term);
+        const mGen = !gen || (p.id >= generationRanges[gen].start && p.id <= generationRanges[gen].end);
+        return mSearch && mGen;
+    });
     const grid = document.getElementById('pokemonGrid');
-    if (grid) grid.innerHTML = filtered.map(p => `
-        <div class="pokemon-card" onclick="showDetail(${p.id})">
-            <div class="pokemon-image"><img src="${p.image}"></div>
-            <div class="pokemon-name">${p.name.toUpperCase()}</div>
-        </div>
-    `).join('');
+    if (grid) grid.innerHTML = filtered.map(p => {
+        const isFav = favs.includes(p.id);
+        return `<div class="pokemon-card${isFav ? ' favorited' : ''}" onclick="showDetail(${p.id})"><button class="fav-btn${isFav ? ' active' : ''}" onclick="toggleFavorite(event, ${p.id})">${isFav ? '⭐' : '☆'}</button><div class="pokemon-image"><img src="${p.image}" loading="lazy"></div><div class="pokemon-name">${p.name.toUpperCase()}</div><div class="pokemon-id">#${String(p.id).padStart(4, '0')}</div></div>`;
+    }).join('');
 }
 
 async function showDetail(id) {
     const p = allPokemon.find(poke => poke.id === id);
     const modal = document.getElementById('detailModal');
+    const content = document.getElementById('detailContent');
     modal.classList.add('show');
+    content.innerHTML = 'Carregando...';
     const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
-    document.getElementById('detailContent').innerHTML = `
-        <img src="${p.image}" style="width:150px">
-        <h2>${p.name.toUpperCase()}</h2>
-        <div>${d.types.map(t => `<span class="type-badge ${t.type.name}">${typeTranslations[t.type.name] || t.type.name}</span>`).join('')}</div>
-    `;
+    p.types = d.types.map(t => t.type.name);
+    p.stats = d.stats;
+    content.innerHTML = `<img src="${p.image}" style="width:180px"><h2>${p.name.toUpperCase()}</h2><div class="types-container">${p.types.map(t => `<span class="type-badge ${t}">${typeTranslations[t] || t}</span>`).join('')}</div><div style="margin-top:20px; text-align:left; font-size:0.8em;">${p.stats.map(s => `<div><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</div>`).join('')}</div>`;
 }
 
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
 
 async function loadItems() {
     const grid = document.getElementById('itemGrid');
-    grid.innerHTML = 'Carregando...';
-    const r = await fetch(`${POKE_API}/item?limit=50`);
+    grid.innerHTML = 'Carregando itens...';
+    const r = await fetch(`${POKE_API}/item?limit=100`);
     const d = await r.json();
     const items = await Promise.all(d.results.map(i => fetch(i.url).then(res => res.json())));
-    grid.innerHTML = items.filter(i => !i.name.includes('ball')).map(i => {
-        const tr = itemDataBR[i.name] || { name: i.name, desc: 'Item útil.' };
-        return `<div class="pokemon-card item-card"><img src="${i.sprites.default}" style="width:40px"><div>${tr.name.toUpperCase()}</div><div class="item-desc">${tr.desc}</div></div>`;
+    grid.innerHTML = items.filter(i => !i.name.includes('ball')).slice(0, 40).map(i => {
+        const tr = itemDataBR[i.name] || { name: i.name.replace(/-/g, ' '), desc: 'Item útil para sua jornada.' };
+        return `<div class="pokemon-card item-card"><img src="${i.sprites.default}" style="width:50px"><div>${tr.name.toUpperCase()}</div><div class="item-desc">${tr.desc}</div></div>`;
     }).join('');
 }
 
 async function loadPokeballs() {
     const grid = document.getElementById('pokeballGrid');
-    grid.innerHTML = 'Carregando...';
-    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball'];
+    grid.innerHTML = 'Carregando pokébolas...';
+    const balls = ['poke-ball', 'great-ball', 'ultra-ball', 'master-ball', 'safari-ball', 'net-ball', 'dive-ball', 'dusk-ball', 'quick-ball'];
     const data = await Promise.all(balls.map(b => fetch(`${POKE_API}/item/${b}`).then(r => r.json())));
     grid.innerHTML = data.map(b => {
         const tr = itemDataBR[b.name] || { name: b.name, desc: 'Pokébola.' };
-        return `<div class="pokemon-card item-card"><img src="${b.sprites.default}" style="width:40px"><div>${tr.name.toUpperCase()}</div><div class="item-desc">${tr.desc}</div></div>`;
+        return `<div class="pokemon-card item-card"><img src="${b.sprites.default}" style="width:50px"><div>${tr.name.toUpperCase()}</div><div class="item-desc">${tr.desc}</div></div>`;
     }).join('');
 }
 
 function openCompareSelector(slot) { activeSlot = slot; document.getElementById('compareSelectorModal').classList.add('show'); showRegions(); }
 function closeCompareSelector() { document.getElementById('compareSelectorModal').classList.remove('show'); }
 function showRegions() {
-    document.getElementById('regionSelector').innerHTML = `<button class="action-btn" onclick="selectForCompare(1)">Bulbasaur</button> <button class="action-btn" onclick="selectForCompare(4)">Charmander</button>`;
+    let html = '';
+    Object.keys(generationRanges).forEach(g => { html += `<button class="action-btn" onclick="selectForCompare(${generationRanges[g].start})">${generationRanges[g].name}</button> `; });
+    document.getElementById('regionSelector').innerHTML = html;
 }
 async function selectForCompare(id) {
-    const p = allPokemon.find(poke => poke.id === id);
+    const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
+    const p = { id: d.id, name: d.name, image: d.sprites.other['official-artwork'].front_default, stats: d.stats };
     compareSlots[activeSlot] = p;
-    document.getElementById(`result${activeSlot}`).innerHTML = `<img src="${p.image}" style="width:100px">`;
+    document.getElementById(`result${activeSlot}`).innerHTML = `<img src="${p.image}" style="width:120px"><div>${p.name.toUpperCase()}</div>`;
     closeCompareSelector();
     if(compareSlots[1] && compareSlots[2]) battleResult();
 }
 function battleResult() {
-    const winner = compareSlots[1];
+    const t1 = compareSlots[1].stats.reduce((a, s) => a + s.base_stat, 0);
+    const t2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
+    const winner = t1 >= t2 ? compareSlots[1] : compareSlots[2];
+    const loser = t1 < t2 ? compareSlots[1] : compareSlots[2];
     document.getElementById('victoryPokemonImg').src = winner.image;
     document.getElementById('victoryPokemonName').textContent = winner.name.toUpperCase();
+    document.getElementById('victoryStatsSummary').innerHTML = `Total de Stats: ${Math.max(t1, t2)} pts | Venceu de ${loser.name.toUpperCase()}`;
     document.getElementById('victoryModal').style.display = 'flex';
 }
 function closeVictoryModal() { document.getElementById('victoryModal').style.display = 'none'; }
+function updateFavoritesGrid() {
+    const favs = getFavorites();
+    const grid = document.getElementById('favoritesGrid');
+    if (!favs.length) { grid.innerHTML = '<p style="grid-column:1/-1; text-align:center">Nenhum favorito.</p>'; return; }
+    grid.innerHTML = allPokemon.filter(p => favs.includes(p.id)).map(p => `<div class="pokemon-card favorited" onclick="showDetail(${p.id})"><button class="fav-btn active" onclick="toggleFavorite(event, ${p.id})">⭐</button><img src="${p.image}" style="width:100px"><div>${p.name.toUpperCase()}</div></div>`).join('');
+}
