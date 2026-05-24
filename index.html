@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <audio id="victorySound" src="https://www.myinstants.com/media/sounds/pokemon-victory-sound.mp3"></audio>
+    <audio id="victorySound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
 
     <div class="dev-banner anime-shine">
         <div class="dev-banner-content">
@@ -69,14 +69,14 @@
                     <div class="compare-slot" id="result1" onclick="openCompareSelector(1)">
                         <div class="slot-placeholder">
                             <div class="plus-icon">+</div>
-                            <span>ESCOLHER POKÉMON 1</span>
+                            <span>POKÉMON 1</span>
                         </div>
                     </div>
                     <div class="vs-circle">VS</div>
                     <div class="compare-slot" id="result2" onclick="openCompareSelector(2)">
                         <div class="slot-placeholder">
                             <div class="plus-icon">+</div>
-                            <span>ESCOLHER POKÉMON 2</span>
+                            <span>POKÉMON 2</span>
                         </div>
                     </div>
                 </div>
@@ -103,7 +103,7 @@
 
     <!-- MODAIS -->
     <div id="detailModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content detail-modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <div id="detailContent"></div>
         </div>
@@ -124,8 +124,10 @@
         <div class="victory-card">
             <div class="victory-header">VENCEDOR!</div>
             <div class="victory-body">
-                <div class="victory-ring"></div>
-                <img id="victoryImg" src="" alt="Vencedor">
+                <div class="victory-ring-container">
+                    <div class="victory-ring"></div>
+                    <img id="victoryImg" src="" alt="Vencedor">
+                </div>
                 <h2 id="victoryName"></h2>
                 <p id="victoryReason"></p>
             </div>
