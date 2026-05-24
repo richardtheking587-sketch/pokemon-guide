@@ -15,11 +15,6 @@ const generationRanges = {
     9: { start: 906, end: 1025, name: "Paldea" }
 };
 
-const statTranslations = {
-    'hp': 'HP', 'attack': 'Ataque', 'defense': 'Defesa',
-    'special-attack': 'Atq. Especial', 'special-defense': 'Def. Especial', 'speed': 'Velocidade'
-};
-
 const typeTranslations = {
     'normal': 'Normal', 'fire': 'Fogo', 'water': 'Água', 'grass': 'Planta',
     'electric': 'Elétrico', 'ice': 'Gelo', 'fighting': 'Lutador', 'poison': 'Venenoso',
@@ -35,13 +30,14 @@ const itemDataBR = {
     'master-ball': { name: 'Bola Mestra', desc: 'A melhor bola. Captura qualquer Pokémon sem falhar.' },
     'potion': { name: 'Poção', desc: 'Restaura 20 HP de um Pokémon.' },
     'super-potion': { name: 'Super Poção', desc: 'Restaura 60 HP de um Pokémon.' },
-    'hyper-potion': { name: 'Hiper Poção', desc: 'Restaura 120 HP de um Pokémon.' },
-    'max-potion': { name: 'Poção Máxima', desc: 'Restaura totalmente o HP de um Pokémon.' },
     'rare-candy': { name: 'Doce Raro', desc: 'Aumenta o nível de um Pokémon em 1.' },
     'revive': { name: 'Reviver', desc: 'Revive um Pokémon desmaiado com metade do HP.' }
 };
 
-document.addEventListener('DOMContentLoaded', ( ) => { loadPokemon(); setupEvents(); });
+document.addEventListener('DOMContentLoaded', ( ) => { 
+    loadPokemon(); 
+    setupEvents(); 
+});
 
 function setupEvents() {
     document.getElementById('searchInput')?.addEventListener('input', filterPokemon);
@@ -59,13 +55,15 @@ function switchTab(tab) {
 }
 
 async function loadPokemon() {
-    const r = await fetch(POKE_API + '/pokemon?limit=1025');
-    const d = await r.json();
-    allPokemon = d.results.map((p, i) => ({
-        id: i + 1, name: p.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`
-    } ));
-    filterPokemon();
+    try {
+        const r = await fetch(POKE_API + '/pokemon?limit=1025');
+        const d = await r.json();
+        allPokemon = d.results.map((p, i) => ({
+            id: i + 1, name: p.name,
+            image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`
+        } ));
+        filterPokemon();
+    } catch(e) { console.error("Erro ao carregar:", e); }
 }
 
 function getFavorites() { return JSON.parse(localStorage.getItem('pokeFavorites') || '[]'); }
@@ -103,7 +101,7 @@ async function showDetail(id) {
     const content = document.getElementById('detailContent');
     content.innerHTML = '<div class="loading">Carregando...</div>';
     const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
-    content.innerHTML = `<img src="${p.image}" style="width:180px"><h2>${p.name.toUpperCase()}</h2><div class="types-container">${d.types.map(t => `<span class="type-badge ${t.type.name}">${typeTranslations[t.type.name] || t.type.name}</span>`).join('')}</div><div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; font-size:0.8em;">${d.stats.map(s => `<div><strong>${statTranslations[s.stat.name] || s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</div>`).join('')}</div>`;
+    content.innerHTML = `<img src="${p.image}" style="width:180px"><h2>${p.name.toUpperCase()}</h2><div class="types-container">${d.types.map(t => `<span class="type-badge ${t.type.name}">${typeTranslations[t.type.name] || t.type.name}</span>`).join('')}</div><div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; font-size:0.8em;">${d.stats.map(s => `<div><strong>${s.stat.name.toUpperCase()}:</strong> ${s.base_stat}</div>`).join('')}</div>`;
 }
 
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
@@ -137,29 +135,43 @@ function showItemDetail(name, img, desc) {
     document.getElementById('detailContent').innerHTML = `<img src="${img}" style="width:100px"><h2>${name.toUpperCase()}</h2><p style="margin-top:20px; color:#888; font-style:italic;">${desc}</p>`;
 }
 
-function openCompareSelector(slot) { activeSlot = slot; document.getElementById('compareSelectorModal').classList.add('show'); showRegions(); }
-function closeCompareSelector() { document.getElementById('compareSelectorModal').classList.remove('show'); }
-
-function showRegions() {
-    let html = '<span class="close" onclick="closeCompareSelector()">&times;</span><h2 style="font-family:Orbitron; margin-bottom:20px">ESCOLHA A REGIÃO</h2>';
-    Object.keys(generationRanges).forEach(g => { html += `<button class="selector-btn" onclick="showPokemonByRegion(${g})">${generationRanges[g].name}</button> `; });
-    document.getElementById('regionSelector').innerHTML = html;
-    document.getElementById('regionSelector').style.display = 'grid';
-    document.getElementById('pokemonSelector').style.display = 'none';
+function openCompareSelector(slot) { 
+    activeSlot = slot; 
+    document.getElementById('compareSelectorModal').classList.add('show'); 
+    showRegions(); 
 }
 
-async function showPokemonByRegion(gen) {
+function closeCompareSelector() { 
+    document.getElementById('compareSelectorModal').classList.remove('show'); 
+}
+
+function showRegions() {
+    document.getElementById('regionSelector').style.display = 'grid';
+    document.getElementById('pokemonSelector').style.display = 'none';
+    let html = '<span class="close" onclick="closeCompareSelector()">&times;</span><h2 style="font-family:Orbitron; margin-bottom:20px; grid-column:1/-1">ESCOLHA A REGIÃO</h2>';
+    Object.keys(generationRanges).forEach(g => { 
+        html += `<button class="selector-btn" onclick="showPokemonByRegion(${g})">${generationRanges[g].name}</button> `; 
+    });
+    document.getElementById('regionSelector').innerHTML = html;
+}
+
+function showPokemonByRegion(gen) {
     document.getElementById('regionSelector').style.display = 'none';
     const pSel = document.getElementById('pokemonSelector');
     pSel.style.display = 'grid';
-    pSel.innerHTML = '<div class="loading">Carregando Pokémons...</div>';
+    pSel.innerHTML = '<div class="loading">Carregando...</div>';
     
-    const start = generationRanges[gen].start;
-    const end = generationRanges[gen].end;
-    const pokes = allPokemon.filter(p => p.id >= start && p.id <= end);
+    const range = generationRanges[gen];
+    const pokes = allPokemon.filter(p => p.id >= range.start && p.id <= range.end);
     
-    pSel.innerHTML = `<button class="selector-btn" style="grid-column:1/-1" onclick="showRegions()">⬅ VOLTAR PARA REGIÕES</button>` + 
-        pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}" style="width:40px"><div>${p.name.toUpperCase()}</div></div>`).join('');
+    let html = `<button class="selector-btn" style="grid-column:1/-1; background:#333" onclick="showRegions()">⬅ VOLTAR PARA REGIÕES</button>`;
+    html += pokes.map(p => `
+        <div class="mini-poke-btn" onclick="selectForCompare(${p.id})">
+            <img src="${p.image}" style="width:40px">
+            <div style="font-size:10px">${p.name.toUpperCase()}</div>
+        </div>
+    `).join('');
+    pSel.innerHTML = html;
 }
 
 async function selectForCompare(id) {
@@ -167,8 +179,7 @@ async function selectForCompare(id) {
     compareSlots[activeSlot] = { 
         name: d.name, 
         image: d.sprites.other['official-artwork'].front_default, 
-        stats: d.stats,
-        types: d.types.map(t => t.type.name)
+        stats: d.stats 
     };
     document.getElementById(`result${activeSlot}`).innerHTML = `<img src="${compareSlots[activeSlot].image}" style="width:120px"><div>${d.name.toUpperCase()}</div>`;
     closeCompareSelector();
@@ -177,25 +188,19 @@ async function selectForCompare(id) {
 
 function updateComparisonAnalysis() {
     if(!compareSlots[1] || !compareSlots[2]) return;
+    const s1 = compareSlots[1].stats.reduce((a, s) => a + s.base_stat, 0);
+    const s2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
     
-    const stats1 = compareSlots[1].stats.reduce((a, s) => a + s.base_stat, 0);
-    const stats2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
-    
-    let analysisHTML = `
+    document.getElementById('comparison-stats').innerHTML = `
         <div class="comparison-stats">
-            <h3 style="text-align:center; font-family:Orbitron; margin-bottom:15px">ANÁLISE DE COMBATE</h3>
             <div class="stat-row">
-                <div class="stat-val ${stats1 >= stats2 ? 'winner' : ''}">${stats1}</div>
-                <div class="stat-label">TOTAL STATS</div>
-                <div class="stat-val ${stats2 >= stats1 ? 'winner' : ''}">${stats2}</div>
+                <div class="stat-val ${s1>=s2?'winner':''}">${s1}</div>
+                <div class="stat-label">TOTAL DE STATS</div>
+                <div class="stat-val ${s2>=s1?'winner':''}">${s2}</div>
             </div>
-            <p style="text-align:center; font-size:0.8em; color:#888; margin-top:10px">
-                ${compareSlots[1].name.toUpperCase()} vs ${compareSlots[2].name.toUpperCase()}
-            </p>
             <button class="action-btn" style="width:100%; margin-top:20px; font-size:1.2em;" onclick="battleResult()">⚔️ INICIAR LUTA!</button>
         </div>
     `;
-    document.getElementById('comparison-stats').innerHTML = analysisHTML;
 }
 
 function battleResult() {
@@ -203,19 +208,19 @@ function battleResult() {
     const t2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
     const winner = t1 >= t2 ? compareSlots[1] : compareSlots[2];
     const loser = t1 < t2 ? compareSlots[1] : compareSlots[2];
-    
     document.getElementById('victoryPokemonImg').src = winner.image;
     document.getElementById('victoryPokemonName').textContent = winner.name.toUpperCase();
-    document.getElementById('victoryStatsSummary').innerHTML = `<strong>Total:</strong> ${Math.max(t1, t2)} pts | Venceu de ${loser.name.toUpperCase()} (+${Math.abs(t1-t2)} pts)`;
-    
+    document.getElementById('victoryStatsSummary').innerHTML = `Venceu com ${Math.max(t1,t2)} pontos contra ${Math.min(t1,t2)} de ${loser.name.toUpperCase()}!`;
     document.getElementById('victoryModal').style.display = 'flex';
 }
 
 function closeVictoryModal() { document.getElementById('victoryModal').style.display = 'none'; }
+
 function updateFavoritesGrid() {
     const favs = getFavorites();
     const grid = document.getElementById('favoritesGrid');
-    if (!favs.length) { grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px; color:#555">Nenhum favorito ainda.</p>'; return; }
-    grid.innerHTML = allPokemon.filter(p => favs.includes(p.id)).map(p => `<div class="pokemon-card favorited" onclick="showDetail(${p.id})"><button class="fav-btn active" onclick="toggleFavorite(event, ${p.id})">⭐</button><img src="${p.image}" style="width:100px"><div class="pokemon-name">${p.name.toUpperCase()}</div></div>`).join('');
+    if (!favs.length) { grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:40px">Nenhum favorito.</p>'; return; }
+    grid.innerHTML = allPokemon.filter(p => favs.includes(p.id)).map(p => `<div class="pokemon-card favorited" onclick="showDetail(${p.id})"><button class="fav-btn active">⭐</button><img src="${p.image}" style="width:100px"><div>${p.name.toUpperCase()}</div></div>`).join('');
 }
+
 function randomPokemon() { showDetail(Math.floor(Math.random() * 1025) + 1); }
