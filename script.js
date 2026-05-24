@@ -33,11 +33,6 @@ const itemDataBR = {
     'great-ball': { name: 'Grande Bola', desc: 'Bola de alto desempenho com melhor taxa de captura.' },
     'ultra-ball': { name: 'Ultra Bola', desc: 'Bola ultra-eficiente para capturar Pokémons.' },
     'master-ball': { name: 'Bola Mestra', desc: 'A melhor bola. Captura qualquer Pokémon sem falhar.' },
-    'safari-ball': { name: 'Bola Safari', desc: 'Bola especial usada na Zona Safari.' },
-    'net-ball': { name: 'Bola de Rede', desc: 'Eficaz contra Pokémons tipo Água e Inseto.' },
-    'dive-ball': { name: 'Bola de Mergulho', desc: 'Funciona melhor em Pokémons debaixo d\'água.' },
-    'dusk-ball': { name: 'Bola do Crepúsculo', desc: 'Eficaz à noite ou em cavernas.' },
-    'quick-ball': { name: 'Bola Rápida', desc: 'Mais eficaz se usada logo no início.' },
     'potion': { name: 'Poção', desc: 'Restaura 20 HP de um Pokémon.' },
     'super-potion': { name: 'Super Poção', desc: 'Restaura 60 HP de um Pokémon.' },
     'hyper-potion': { name: 'Hiper Poção', desc: 'Restaura 120 HP de um Pokémon.' },
@@ -68,8 +63,7 @@ async function loadPokemon() {
     const d = await r.json();
     allPokemon = d.results.map((p, i) => ({
         id: i + 1, name: p.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`,
-        shiny: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${i + 1}.png`
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`
     } ));
     filterPokemon();
 }
@@ -147,29 +141,61 @@ function openCompareSelector(slot) { activeSlot = slot; document.getElementById(
 function closeCompareSelector() { document.getElementById('compareSelectorModal').classList.remove('show'); }
 
 function showRegions() {
-    let html = '';
+    let html = '<span class="close" onclick="closeCompareSelector()">&times;</span><h2 style="font-family:Orbitron; margin-bottom:20px">ESCOLHA A REGIÃO</h2>';
     Object.keys(generationRanges).forEach(g => { html += `<button class="selector-btn" onclick="showPokemonByRegion(${g})">${generationRanges[g].name}</button> `; });
     document.getElementById('regionSelector').innerHTML = html;
     document.getElementById('regionSelector').style.display = 'grid';
     document.getElementById('pokemonSelector').style.display = 'none';
 }
 
-function showPokemonByRegion(gen) {
-    const pokes = allPokemon.filter(p => p.id >= generationRanges[gen].start && p.id <= generationRanges[gen].end);
+async function showPokemonByRegion(gen) {
     document.getElementById('regionSelector').style.display = 'none';
     const pSel = document.getElementById('pokemonSelector');
     pSel.style.display = 'grid';
-    pSel.innerHTML = `<button class="selector-btn" style="grid-column:1/-1" onclick="showRegions()">⬅ VOLTAR</button>` + pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}" style="width:40px"><div>${p.name.toUpperCase()}</div></div>`).join('');
+    pSel.innerHTML = '<div class="loading">Carregando Pokémons...</div>';
+    
+    const start = generationRanges[gen].start;
+    const end = generationRanges[gen].end;
+    const pokes = allPokemon.filter(p => p.id >= start && p.id <= end);
+    
+    pSel.innerHTML = `<button class="selector-btn" style="grid-column:1/-1" onclick="showRegions()">⬅ VOLTAR PARA REGIÕES</button>` + 
+        pokes.map(p => `<div class="mini-poke-btn" onclick="selectForCompare(${p.id})"><img src="${p.image}" style="width:40px"><div>${p.name.toUpperCase()}</div></div>`).join('');
 }
 
 async function selectForCompare(id) {
     const d = await fetch(`${POKE_API}/pokemon/${id}`).then(res => res.json());
-    compareSlots[activeSlot] = { name: d.name, image: d.sprites.other['official-artwork'].front_default, stats: d.stats };
+    compareSlots[activeSlot] = { 
+        name: d.name, 
+        image: d.sprites.other['official-artwork'].front_default, 
+        stats: d.stats,
+        types: d.types.map(t => t.type.name)
+    };
     document.getElementById(`result${activeSlot}`).innerHTML = `<img src="${compareSlots[activeSlot].image}" style="width:120px"><div>${d.name.toUpperCase()}</div>`;
     closeCompareSelector();
-    if(compareSlots[1] && compareSlots[2]) {
-        document.getElementById('comparison-stats').innerHTML = `<button class="action-btn" style="width:100%; margin-top:20px" onclick="battleResult()">⚔️ QUEM VENCE?</button>`;
-    }
+    updateComparisonAnalysis();
+}
+
+function updateComparisonAnalysis() {
+    if(!compareSlots[1] || !compareSlots[2]) return;
+    
+    const stats1 = compareSlots[1].stats.reduce((a, s) => a + s.base_stat, 0);
+    const stats2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
+    
+    let analysisHTML = `
+        <div class="comparison-stats">
+            <h3 style="text-align:center; font-family:Orbitron; margin-bottom:15px">ANÁLISE DE COMBATE</h3>
+            <div class="stat-row">
+                <div class="stat-val ${stats1 >= stats2 ? 'winner' : ''}">${stats1}</div>
+                <div class="stat-label">TOTAL STATS</div>
+                <div class="stat-val ${stats2 >= stats1 ? 'winner' : ''}">${stats2}</div>
+            </div>
+            <p style="text-align:center; font-size:0.8em; color:#888; margin-top:10px">
+                ${compareSlots[1].name.toUpperCase()} vs ${compareSlots[2].name.toUpperCase()}
+            </p>
+            <button class="action-btn" style="width:100%; margin-top:20px; font-size:1.2em;" onclick="battleResult()">⚔️ INICIAR LUTA!</button>
+        </div>
+    `;
+    document.getElementById('comparison-stats').innerHTML = analysisHTML;
 }
 
 function battleResult() {
@@ -177,9 +203,11 @@ function battleResult() {
     const t2 = compareSlots[2].stats.reduce((a, s) => a + s.base_stat, 0);
     const winner = t1 >= t2 ? compareSlots[1] : compareSlots[2];
     const loser = t1 < t2 ? compareSlots[1] : compareSlots[2];
+    
     document.getElementById('victoryPokemonImg').src = winner.image;
     document.getElementById('victoryPokemonName').textContent = winner.name.toUpperCase();
     document.getElementById('victoryStatsSummary').innerHTML = `<strong>Total:</strong> ${Math.max(t1, t2)} pts | Venceu de ${loser.name.toUpperCase()} (+${Math.abs(t1-t2)} pts)`;
+    
     document.getElementById('victoryModal').style.display = 'flex';
 }
 
